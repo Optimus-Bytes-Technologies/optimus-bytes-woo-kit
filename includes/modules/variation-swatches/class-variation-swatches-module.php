@@ -71,7 +71,7 @@ class Variation_Swatches_Module extends Abstract_Module {
     public function __construct() {
         $this->id          = 'variation_swatches';
         $this->title       = __('Variation Swatches for WooCommerce', 'optimus-bytes-woo-kit');
-        $this->description = __('Converts plain variation dropdowns into interactive color circles, image thumbnails, and pill button swatches with stock availability detection.', 'optimus-bytes-woo-kit');
+        $this->description = __('Converts plain variation dropdowns into interactive color circles, image thumbnails, and pill button swatches with product loop and quick view support.', 'optimus-bytes-woo-kit');
         $this->icon        = '🎨';
         $this->category    = __('Product & UX', 'optimus-bytes-woo-kit');
     }
@@ -85,6 +85,9 @@ class Variation_Swatches_Module extends Abstract_Module {
 
         // Replace WooCommerce dropdown HTML with Swatches
         add_filter('woocommerce_dropdown_variation_attribute_options_html', array($this, 'render_swatches_html'), 10, 2);
+
+        // Product Loop Swatches on Shop / Category cards
+        add_action('woocommerce_after_shop_loop_item', array($this, 'render_loop_swatches'), 9);
     }
 
     /**
@@ -97,7 +100,7 @@ class Variation_Swatches_Module extends Abstract_Module {
 
         $wp_customize->add_section($section_id, array(
             'title'       => __('Variation Swatches', 'optimus-bytes-woo-kit'),
-            'description' => __('Configure visual color circles, button badges, and swatch shapes for variable products.', 'optimus-bytes-woo-kit'),
+            'description' => __('Configure visual color circles, button badges, and swatch shapes for product pages, quick view modals, and catalog loops.', 'optimus-bytes-woo-kit'),
             'priority'    => 123,
         ));
 
@@ -111,6 +114,19 @@ class Variation_Swatches_Module extends Abstract_Module {
             'label'    => __('Enable Variation Swatches', 'optimus-bytes-woo-kit'),
             'section'  => $section_id,
             'type'     => 'checkbox',
+        ));
+
+        // Enable Loop Swatches (Shop / Archive Cards)
+        $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[variation_swatches_loop_enable]', array(
+            'type'              => 'option',
+            'default'           => true,
+            'sanitize_callback' => 'wp_validate_boolean',
+        ));
+        $wp_customize->add_control(OBWK_SETTINGS_OPTION . '[variation_swatches_loop_enable]', array(
+            'label'       => __('Show Swatches in Product Catalog Grid', 'optimus-bytes-woo-kit'),
+            'description' => __('Displays preview color swatches on shop and category product cards with image switching.', 'optimus-bytes-woo-kit'),
+            'section'     => $section_id,
+            'type'        => 'checkbox',
         ));
 
         // Swatch Shape
@@ -178,10 +194,10 @@ class Variation_Swatches_Module extends Abstract_Module {
     }
 
     /**
-     * Enqueue CSS & JS
+     * Enqueue CSS & JS globally for product pages, loop swatches, and quick view modals
      */
     public function enqueue_scripts() {
-        if (!function_exists('is_product') || !is_product() || !$this->is_enabled()) {
+        if (!$this->is_enabled()) {
             return;
         }
 
@@ -233,7 +249,6 @@ class Variation_Swatches_Module extends Abstract_Module {
             if (!empty($custom_color)) {
                 return $custom_color;
             }
-            // Compatibility check for other swatches term meta
             $thvs_color = get_term_meta($term->term_id, 'thvs_color', true);
             if (!empty($thvs_color)) {
                 return $thvs_color;
@@ -252,7 +267,7 @@ class Variation_Swatches_Module extends Abstract_Module {
         }
 
         // 4. Check if term name itself is a valid hex code
-        if (preg_match('/^#([a-f0-9]{3}){1,2}\$/i', $name)) {
+        if (preg_match('/^#([a-f0-9]{3}){1,2}$/i', $name)) {
             return $name;
         }
 
@@ -360,7 +375,81 @@ class Variation_Swatches_Module extends Abstract_Module {
 
         $swatches_html .= '</div>';
 
-        // Keep native hidden <select> to ensure 100% WooCommerce JS and AJAX compatibility
+        // Keep native hidden <select> to ensure 100% WooCommerce JS, Quick View, and AJAX compatibility
         return $swatches_html . '<div class="obwk-hidden-select-wrap" style="display:none !important;">' . $html . '</div>';
+    }
+
+    /**
+     * Render Mini Color Swatches in the WooCommerce Product Loop (Shop & Category Cards)
+     */
+    public function render_loop_swatches() {
+        if (!$this->is_enabled() || !(bool) $this->get_option('loop_enable', true)) {
+            return;
+        }
+
+        global $product;
+        if (!is_a($product, '\WC_Product') || !$product->is_type('variable')) {
+            return;
+        }
+
+        $attributes = $product->get_variation_attributes();
+        $color_attr_key = '';
+
+        foreach ($attributes as $key => $options) {
+            if ('color' === self::get_swatch_type($key)) {
+                $color_attr_key = $key;
+                break;
+            }
+        }
+
+        if (empty($color_attr_key) || empty($attributes[$color_attr_key])) {
+            return;
+        }
+
+        $color_options = $attributes[$color_attr_key];
+        $variations    = $product->get_available_variations();
+        $shape         = $this->get_option('shape', 'rounded');
+        $max_visible   = 5;
+        $count         = 0;
+
+        // Map variations by color slug for instant image switching
+        $color_images = array();
+        foreach ($variations as $var) {
+            $attr_name = 'attribute_' . sanitize_title($color_attr_key);
+            $var_color = isset($var['attributes'][$attr_name]) ? $var['attributes'][$attr_name] : '';
+            if (!empty($var_color) && !empty($var['image']['src']) && !isset($color_images[$var_color])) {
+                $color_images[$var_color] = $var['image']['src'];
+            }
+        }
+
+        $main_image_id  = $product->get_image_id();
+        $main_image_url = $main_image_id ? wp_get_attachment_image_url($main_image_id, 'woocommerce_thumbnail') : wc_placeholder_img_src('woocommerce_thumbnail');
+
+        echo '<div class="obwk-loop-swatches obwk-shape-' . esc_attr($shape) . '" data-product-id="' . esc_attr($product->get_id()) . '" data-default-image="' . esc_url($main_image_url) . '">';
+
+        foreach ($color_options as $option) {
+            $count++;
+            if ($count > $max_visible) {
+                $remaining = count($color_options) - $max_visible;
+                echo '<a href="' . esc_url(get_permalink($product->get_id())) . '" class="obwk-loop-more-badge" title="' . esc_attr__('View all colors', 'optimus-bytes-woo-kit') . '">+' . esc_html($remaining) . '</a>';
+                break;
+            }
+
+            $term = taxonomy_exists($color_attr_key) ? get_term_by('slug', $option, $color_attr_key) : $option;
+            $term_name = is_object($term) ? $term->name : $option;
+            $term_slug = is_object($term) ? $term->slug : $option;
+            $color_hex = self::resolve_color_hex($term);
+            $img_src   = isset($color_images[$term_slug]) ? $color_images[$term_slug] : $main_image_url;
+
+            echo sprintf(
+                '<span class="obwk-loop-swatch" style="background-color: %s;" data-image-src="%s" data-tooltip="%s" title="%s" role="button" tabindex="0"><span class="obwk-loop-swatch-inner"></span></span>',
+                esc_attr($color_hex),
+                esc_url($img_src),
+                esc_attr($term_name),
+                esc_attr($term_name)
+            );
+        }
+
+        echo '</div>';
     }
 }

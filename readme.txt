@@ -1,7 +1,7 @@
 === Optimus Bytes Woo Kit ===
 Contributors: optimusbytes
 Donate link: https://optimusbytes.com/
-Tags: woocommerce, color filter, swatch filter, layered nav, variation swatches, color swatches, announcement bar, marquee, sticky add to cart, buy now, whatsapp, order on whatsapp, ecommerce, sales booster
+Tags: woocommerce, product loop swatches, quick view swatches, color filter, swatch filter, layered nav, variation swatches, color swatches, announcement bar, marquee, sticky add to cart, buy now, whatsapp, order on whatsapp, ecommerce, sales booster
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -9,26 +9,29 @@ Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-A modular, high-performance toolkit for WooCommerce stores featuring color swatch filters, product swatches, top announcement marquee bars, sticky purchase bars, 1-click buy now checkout, and smart WhatsApp ordering tools by Optimus Bytes Technologies.
+A modular, high-performance toolkit for WooCommerce stores featuring product loop swatches, quick view modal swatches, color swatch filters, top announcement marquee bars, sticky purchase bars, 1-click buy now checkout, and smart WhatsApp ordering tools by Optimus Bytes Technologies.
 
 == Description ==
 
-**Optimus Bytes Woo Kit** is a modular, lightweight, and high-conversion toolkit designed for WooCommerce stores. It empowers merchants with visual product swatches, shop sidebar color filters, promotional announcement bars, sticky purchase triggers, and direct WhatsApp customer ordering.
+**Optimus Bytes Woo Kit** is a modular, lightweight, and high-conversion toolkit designed for WooCommerce stores. It empowers merchants with visual product swatches in catalog loops & quick view modals, shop sidebar color filters, promotional announcement bars, sticky purchase triggers, and direct WhatsApp customer ordering.
 
 ### 🌟 Active Modules Included:
 
-#### 1. 🎯 Color Swatch Filter Widget & Shortcode
-* **Visual Color Filtering for Shop Sidebars**: Replaces plain text attribute filter lists with visual Color Circles (Grid mode) or List items with Color Dots.
-* **WordPress Widget & Shortcode**: Place anywhere using standard WordPress widgets or shortcode `[obwk_color_filter]`.
-* **WooCommerce Query Integration**: Multi-select filtering supporting `OR` queries (`?filter_color=maroon,royal-blue`), preserving active price ranges and categories.
-* **Instant "Clear Filter" Button**: Quick action button to reset active color selections.
-
-#### 2. 🎨 Variation Swatches for WooCommerce
+#### 1. 🎨 Variation Swatches for WooCommerce (Product Pages, Loop Cards & Quick View)
+* **Product Catalog Loop Swatches**: Displays mini color swatches on shop and category product cards with instant hover/click image switching.
+* **Theme Quick View Modal Support**: Automatically initializes and renders visual swatches inside theme quick view popups (`th_quick_view`, `thnew_quick_view`, etc.).
 * **Visual Color & Button Swatches**: Transforms ugly default `<select>` dropdowns into interactive color circles, image thumbnails, and clean button/pill badges.
 * **Smart Color Resolver**: Automatically recognizes dozens of color names and Indian saree hues (Royal Blue, Rani Pink, Maroon, Peacock Green, Zari Gold, Mustard, Bottle Green, etc.) and renders accurate colors without manual setup.
 * **Real-time Out-of-Stock Detection**: Automatically disables and strikes through unavailable variation combinations with clean diagonal lines.
 * **Hover Tooltips**: Floating labels displaying term names when hovering over swatches.
 * **100% Core & AJAX Compatible**: Synchronizes seamlessly with WooCommerce's variation scripts, price changes, and gallery images.
+
+#### 2. 🎯 Color Swatch Filter Widget & Shortcode
+* **Visual Color Filtering for Shop Sidebars**: Replaces plain text attribute filter lists with visual Color Circles (Grid mode) or List items with Color Dots.
+* **Category & Subcategory Aware Counts**: Accurately counts matching products in the currently viewed category tree, stock status, and active filters.
+* **WordPress Widget & Shortcode**: Place anywhere using standard WordPress widgets or shortcode `[obwk_color_filter]`.
+* **WooCommerce Query Integration**: Multi-select filtering supporting `OR` queries (`?filter_color=maroon,royal-blue`), preserving active price ranges and categories.
+* **Instant "Clear Filter" Button**: Quick action button to reset active color selections.
 
 #### 3. 📢 Scrolling Announcement Bar (Marquee Ticker)
 * **Standard WordPress Core Hook**: Attached to `wp_body_open` for 100% standalone theme compatibility.
@@ -68,11 +71,13 @@ A modular, high-performance toolkit for WooCommerce stores featuring color swatc
 ### Configuration
 1. Click on **Optimus Woo Kit** in your WordPress Admin sidebar.
 2. Use the toggle switches to enable or disable features.
-3. Click **Configure Settings** or go to **Appearance > Customize** or **Appearance > Widgets** to place filter widgets.
+3. Click **Configure Settings** or go to **Appearance > Customize** to adjust settings live.
 
 == Changelog ==
 
 = 1.3.0 =
+* Added Product Loop Swatches on shop/category cards with live image switching on hover/click.
+* Added Universal Quick View modal swatch initialization and compatibility.
 * Added Color Swatch Filter Widget & Shortcode module with multi-select support, grid & list layouts, and instant filter reset button.
 
 = 1.2.0 =
