@@ -3,7 +3,7 @@
  * Plugin Name:       Optimus Bytes Woo Kit
  * Plugin URI:        https://optimusbytes.com/
  * Description:       A modular, high-performance toolkit for WooCommerce and e-commerce stores by Optimus Bytes Technologies.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Author:            Optimus Bytes Technologies
  * Author URI:        https://optimusbytes.com/
  * License:           GPL-2.0+
@@ -21,7 +21,7 @@ namespace OptimusBytes\WooKit;
 defined('ABSPATH') || exit;
 
 // Plugin Constants
-define('OBWK_VERSION', '1.1.0');
+define('OBWK_VERSION', '1.2.0');
 define('OBWK_PLUGIN_FILE', __FILE__);
 define('OBWK_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('OBWK_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -73,7 +73,7 @@ spl_autoload_register(function ($class) {
     // Convert class name to WordPress naming convention: class-something.php
     $formatted_class_name = 'class-' . strtolower(str_replace('_', '-', $class_name)) . '.php';
 
-    // Subdirectories converting underscores to hyphens (e.g. Announcement_Bar -> announcement-bar)
+    // Subdirectories converting underscores to hyphens (e.g. Variation_Swatches -> variation-swatches)
     $sub_dir = '';
     if (!empty($parts)) {
         $dir_parts = array_map(function ($p) {

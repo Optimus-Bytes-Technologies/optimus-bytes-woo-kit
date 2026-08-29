@@ -72,6 +72,9 @@ class Plugin {
         // Register Announcement Bar Module
         $this->register_module(new Modules\Announcement_Bar\Announcement_Bar_Module());
 
+        // Register Variation Swatches Module
+        $this->register_module(new Modules\Variation_Swatches\Variation_Swatches_Module());
+
         // Register WhatsApp Floating Contact Button Module
         $this->register_module(new Modules\WhatsApp\WhatsApp_Module());
 

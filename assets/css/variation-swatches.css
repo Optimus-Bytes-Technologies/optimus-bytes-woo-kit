@@ -1,0 +1,208 @@
+/* ==========================================================================
+   Optimus Bytes Woo Kit - Variation Swatches Styles
+   ========================================================================== */
+
+.obwk-swatches-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 0 14px 0;
+    user-select: none;
+}
+
+/* Base Swatch */
+.obwk-swatch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+}
+
+.obwk-swatch:not(.is-disabled):hover {
+    transform: translateY(-2px);
+}
+
+/* ==========================================
+   Color Swatches
+   ========================================== */
+.obwk-swatch-color {
+    border-radius: 50%;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    border: 2px solid transparent;
+}
+
+/* Size Variants (Colors) */
+.obwk-size-small .obwk-swatch-color {
+    width: 28px;
+    height: 28px;
+}
+
+.obwk-size-medium .obwk-swatch-color {
+    width: 36px;
+    height: 36px;
+}
+
+.obwk-size-large .obwk-swatch-color {
+    width: 44px;
+    height: 44px;
+}
+
+/* Shape Variants */
+.obwk-shape-square .obwk-swatch-color {
+    border-radius: 6px;
+}
+
+.obwk-shape-rounded .obwk-swatch-color {
+    border-radius: 50%;
+}
+
+/* Border guide for pure white or very light swatches */
+.obwk-swatch-border-guide {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1px solid rgba(0, 0, 0, 0.18);
+    pointer-events: none;
+}
+
+/* Selected Color Swatch */
+.obwk-swatch-color.is-selected {
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--theme-color, #c5a059);
+    transform: scale(1.06);
+}
+
+.obwk-swatch-color.is-selected::after {
+    content: "✓";
+    font-size: 15px;
+    font-weight: 800;
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    position: absolute;
+    z-index: 3;
+}
+
+/* White / Light color swatch checkmark color override */
+.obwk-swatch-color[style*="background-color: #ffffff"].is-selected::after,
+.obwk-swatch-color[style*="background-color: #fafaf9"].is-selected::after,
+.obwk-swatch-color[style*="background-color: #fef3c7"].is-selected::after,
+.obwk-swatch-color[style*="background-color: #f5f5dc"].is-selected::after,
+.obwk-swatch-color[style*="background-color: #fbcfe8"].is-selected::after {
+    color: #0f172a;
+    text-shadow: none;
+}
+
+/* ==========================================
+   Button / Pill Swatches (Sizes, Fabrics)
+   ========================================== */
+.obwk-swatch-button {
+    background: var(--theme-bg-dark, #150704);
+    border: 1px solid var(--theme-color, rgba(164, 109, 53, 0.4));
+    color: var(--body-text, #ffffff);
+    border-radius: 6px;
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 42px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.obwk-size-small .obwk-swatch-button {
+    padding: 4px 10px;
+    font-size: 12px;
+}
+
+.obwk-size-large .obwk-swatch-button {
+    padding: 9px 20px;
+    font-size: 14px;
+}
+
+.obwk-swatch-button:not(.is-disabled):hover {
+    border-color: var(--theme-color-light, #e5ba59);
+    background: var(--theme-bg, #2b0f08);
+}
+
+.obwk-swatch-button.is-selected {
+    background: var(--theme-color, #a46d35);
+    color: #ffffff !important;
+    border-color: var(--theme-color-light, #e5ba59);
+    box-shadow: 0 2px 8px rgba(164, 109, 53, 0.4);
+}
+
+/* ==========================================
+   Out of Stock / Disabled State (Diagonal Strike-Through)
+   ========================================== */
+.obwk-swatch.is-disabled {
+    cursor: not-allowed !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Style: Cross & Blur / Dimmed (Default) */
+.obwk-stock-cross_blur .obwk-swatch.is-disabled {
+    opacity: 0.45;
+}
+
+.obwk-stock-cross_blur .obwk-swatch.is-disabled::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -30%;
+    right: -30%;
+    height: 2px;
+    background: #ef4444;
+    transform: rotate(-45deg);
+    z-index: 5;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+}
+
+/* Style: Dimmed Only */
+.obwk-stock-dimmed .obwk-swatch.is-disabled {
+    opacity: 0.35;
+}
+
+/* Style: Hide */
+.obwk-stock-hide .obwk-swatch.is-disabled {
+    display: none !important;
+}
+
+/* ==========================================
+   Tooltips
+   ========================================== */
+.obwk-swatch[data-tooltip] {
+    position: relative;
+}
+
+.obwk-swatch[data-tooltip]::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 9px;
+    border-radius: 5px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    z-index: 1000;
+}
+
+.obwk-swatch[data-tooltip]:hover::before {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
