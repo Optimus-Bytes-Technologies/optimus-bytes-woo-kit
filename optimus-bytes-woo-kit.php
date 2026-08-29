@@ -26,6 +26,7 @@ define('OBWK_PLUGIN_FILE', __FILE__);
 define('OBWK_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('OBWK_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('OBWK_PLUGIN_BASENAME', plugin_basename(__FILE__));
+define('OBWK_SETTINGS_OPTION', 'optimus_bytes_woo_kit_settings');
 
 /**
  * Declare WooCommerce HPOS and Feature Compatibility
@@ -72,10 +73,13 @@ spl_autoload_register(function ($class) {
     // Convert class name to WordPress naming convention: class-something.php
     $formatted_class_name = 'class-' . strtolower(str_replace('_', '-', $class_name)) . '.php';
 
-    // Subdirectories if any
+    // Subdirectories converting underscores to hyphens (e.g. Product_WhatsApp -> product-whatsapp)
     $sub_dir = '';
     if (!empty($parts)) {
-        $sub_dir = strtolower(implode('/', $parts)) . '/';
+        $dir_parts = array_map(function ($p) {
+            return strtolower(str_replace('_', '-', $p));
+        }, $parts);
+        $sub_dir = implode('/', $dir_parts) . '/';
     }
 
     $file = $base_dir . $sub_dir . $formatted_class_name;

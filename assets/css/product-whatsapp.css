@@ -1,0 +1,147 @@
+/* ==========================================================================
+   Optimus Bytes Woo Kit - Single Product Page "Order on WhatsApp" Button
+   ========================================================================== */
+
+.obwk-product-whatsapp-wrapper {
+    margin-top: 14px;
+    margin-bottom: 12px;
+    clear: both;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+/* Width variations */
+.obwk-product-whatsapp-wrapper.obwk-btn-width-full {
+    width: 100%;
+}
+
+.obwk-product-whatsapp-wrapper.obwk-btn-width-full .obwk-product-wa-btn {
+    width: 100%;
+}
+
+.obwk-product-whatsapp-wrapper.obwk-btn-width-auto {
+    display: inline-block;
+}
+
+/* Primary Button Base */
+.obwk-product-wa-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-decoration: none !important;
+    cursor: pointer;
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Solid WhatsApp Theme */
+.obwk-btn-style-solid .obwk-product-wa-btn {
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    color: #ffffff !important;
+    border: none;
+    box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3);
+}
+
+.obwk-btn-style-solid .obwk-product-wa-btn:hover {
+    background: linear-gradient(135deg, #20bd5a 0%, #0e7065 100%);
+    color: #ffffff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(37, 211, 102, 0.45);
+}
+
+.obwk-btn-style-solid .obwk-product-wa-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(37, 211, 102, 0.25);
+}
+
+/* Outline Theme */
+.obwk-btn-style-outline .obwk-product-wa-btn {
+    background: transparent;
+    color: #25D366 !important;
+    border: 2px solid #25D366;
+    box-shadow: none;
+}
+
+.obwk-btn-style-outline .obwk-product-wa-btn:hover {
+    background: #25D366;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(37, 211, 102, 0.35);
+}
+
+/* Luxury Saree Theme (Gold + Green) */
+.obwk-btn-style-luxury .obwk-product-wa-btn {
+    background: linear-gradient(135deg, #a46d35 0%, #150704 100%);
+    color: #e5ba59 !important;
+    border: 1px solid #e5ba59;
+    box-shadow: 0 4px 14px rgba(229, 186, 89, 0.25);
+}
+
+.obwk-btn-style-luxury .obwk-product-wa-btn:hover {
+    background: linear-gradient(135deg, #b87c3e 0%, #2b0f08 100%);
+    color: #ffffff !important;
+    border-color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(229, 186, 89, 0.4);
+}
+
+/* Focus state */
+.obwk-product-wa-btn:focus-visible {
+    outline: 3px solid #25D366;
+    outline-offset: 3px;
+}
+
+/* SVG Icon */
+.obwk-pwa-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.25s ease;
+}
+
+.obwk-product-wa-btn:hover .obwk-pwa-icon {
+    transform: scale(1.15) rotate(-6deg);
+}
+
+.obwk-pwa-icon svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+    display: block;
+}
+
+/* Button Text */
+.obwk-pwa-text {
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* Tagline Subtext */
+.obwk-pwa-tagline {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #64748b;
+    text-align: center;
+    line-height: 1.4;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 576px) {
+    .obwk-product-wa-btn {
+        font-size: 14px;
+        min-height: 46px;
+        padding: 10px 18px;
+    }
+}

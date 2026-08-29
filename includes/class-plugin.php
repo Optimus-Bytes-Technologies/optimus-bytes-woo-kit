@@ -72,6 +72,9 @@ class Plugin {
         // Register WhatsApp Floating Contact Button Module
         $this->register_module(new Modules\WhatsApp\WhatsApp_Module());
 
+        // Register Single Product Order on WhatsApp Module
+        $this->register_module(new Modules\Product_WhatsApp\Product_WhatsApp_Module());
+
         /**
          * Action to register additional custom modules
          *

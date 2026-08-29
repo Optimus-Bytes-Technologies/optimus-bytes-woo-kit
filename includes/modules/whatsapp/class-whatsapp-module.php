@@ -18,8 +18,8 @@ class WhatsApp_Module extends Abstract_Module {
      */
     public function __construct() {
         $this->id          = 'whatsapp';
-        $this->title       = __('WhatsApp Floating Contact Button', 'optimus-bytes-woo-kit');
-        $this->description = __('Floating WhatsApp contact button with smart message prefilling on product, cart, and checkout pages.', 'optimus-bytes-woo-kit');
+        $this->title       = __('Floating WhatsApp Contact Button', 'optimus-bytes-woo-kit');
+        $this->description = __('Floating WhatsApp contact button on all store pages with smart message prefilling for products, cart, and general queries.', 'optimus-bytes-woo-kit');
         $this->icon        = '💬';
         $this->category    = __('Customer Support', 'optimus-bytes-woo-kit');
     }
@@ -34,7 +34,7 @@ class WhatsApp_Module extends Abstract_Module {
     }
 
     /**
-     * Register WordPress Customizer settings
+     * Register WordPress Customizer settings under plugin option optimus_bytes_woo_kit_settings
      *
      * @param \WP_Customize_Manager $wp_customize
      */
@@ -42,28 +42,30 @@ class WhatsApp_Module extends Abstract_Module {
         $section_id = 'obwk_whatsapp_section';
 
         $wp_customize->add_section($section_id, array(
-            'title'       => __('WhatsApp Floating Button', 'optimus-bytes-woo-kit'),
+            'title'       => __('Floating WhatsApp Button', 'optimus-bytes-woo-kit'),
             'description' => __('Configure the floating WhatsApp contact button for your store.', 'optimus-bytes-woo-kit'),
             'priority'    => 120,
         ));
 
         // Enable / Disable
-        $wp_customize->add_setting('obwk_whatsapp_enable', array(
+        $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[whatsapp_enable]', array(
+            'type'              => 'option',
             'default'           => true,
             'sanitize_callback' => 'wp_validate_boolean',
         ));
-        $wp_customize->add_control('obwk_whatsapp_enable', array(
-            'label'    => __('Enable WhatsApp Button', 'optimus-bytes-woo-kit'),
+        $wp_customize->add_control(OBWK_SETTINGS_OPTION . '[whatsapp_enable]', array(
+            'label'    => __('Enable Floating WhatsApp Button', 'optimus-bytes-woo-kit'),
             'section'  => $section_id,
             'type'     => 'checkbox',
         ));
 
         // Phone Number
-        $wp_customize->add_setting('obwk_whatsapp_number', array(
+        $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[whatsapp_number]', array(
+            'type'              => 'option',
             'default'           => '+91 98765 43210',
             'sanitize_callback' => 'sanitize_text_field',
         ));
-        $wp_customize->add_control('obwk_whatsapp_number', array(
+        $wp_customize->add_control(OBWK_SETTINGS_OPTION . '[whatsapp_number]', array(
             'label'       => __('WhatsApp Phone Number', 'optimus-bytes-woo-kit'),
             'description' => __('Include country code (e.g. +91 9876543210)', 'optimus-bytes-woo-kit'),
             'section'     => $section_id,
@@ -71,22 +73,24 @@ class WhatsApp_Module extends Abstract_Module {
         ));
 
         // Button Tooltip / Label
-        $wp_customize->add_setting('obwk_whatsapp_label', array(
+        $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[whatsapp_label]', array(
+            'type'              => 'option',
             'default'           => 'Chat with us',
             'sanitize_callback' => 'sanitize_text_field',
         ));
-        $wp_customize->add_control('obwk_whatsapp_label', array(
+        $wp_customize->add_control(OBWK_SETTINGS_OPTION . '[whatsapp_label]', array(
             'label'    => __('Button Label / Tooltip', 'optimus-bytes-woo-kit'),
             'section'  => $section_id,
             'type'     => 'text',
         ));
 
         // Position
-        $wp_customize->add_setting('obwk_whatsapp_position', array(
+        $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[whatsapp_position]', array(
+            'type'              => 'option',
             'default'           => 'bottom-left',
             'sanitize_callback' => 'sanitize_text_field',
         ));
-        $wp_customize->add_control('obwk_whatsapp_position', array(
+        $wp_customize->add_control(OBWK_SETTINGS_OPTION . '[whatsapp_position]', array(
             'label'    => __('Button Position', 'optimus-bytes-woo-kit'),
             'section'  => $section_id,
             'type'     => 'select',
@@ -97,11 +101,12 @@ class WhatsApp_Module extends Abstract_Module {
         ));
 
         // Default Message
-        $wp_customize->add_setting('obwk_whatsapp_default_msg', array(
+        $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[whatsapp_default_msg]', array(
+            'type'              => 'option',
             'default'           => 'Hi SMV Sarees! I would like to inquire about your saree collections.',
             'sanitize_callback' => 'sanitize_textarea_field',
         ));
-        $wp_customize->add_control('obwk_whatsapp_default_msg', array(
+        $wp_customize->add_control(OBWK_SETTINGS_OPTION . '[whatsapp_default_msg]', array(
             'label'    => __('Default Greeting Message (General Pages)', 'optimus-bytes-woo-kit'),
             'section'  => $section_id,
             'type'     => 'textarea',

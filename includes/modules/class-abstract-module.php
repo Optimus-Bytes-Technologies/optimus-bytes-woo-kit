@@ -92,7 +92,7 @@ abstract class Abstract_Module {
     }
 
     /**
-     * Get direct configuration URL
+     * Get direct configuration URL in Customizer
      *
      * @return string
      */
@@ -106,22 +106,42 @@ abstract class Abstract_Module {
      * @return bool
      */
     public function is_enabled() {
-        return (bool) get_theme_mod('obwk_' . $this->id . '_enable', true);
+        $options = get_option(OBWK_SETTINGS_OPTION, array());
+        $key     = $this->id . '_enable';
+
+        return isset($options[$key]) ? (bool) $options[$key] : true;
     }
 
     /**
-     * Initialize module hooks and behavior
-     */
-    abstract public function init();
-
-    /**
-     * Get a module setting value
+     * Get a module setting value from optimus_bytes_woo_kit_settings
      *
      * @param string $key
      * @param mixed $default
      * @return mixed
      */
     public function get_option($key, $default = '') {
-        return get_theme_mod('obwk_' . $this->id . '_' . $key, $default);
+        $options  = get_option(OBWK_SETTINGS_OPTION, array());
+        $full_key = $this->id . '_' . $key;
+
+        return isset($options[$full_key]) ? $options[$full_key] : $default;
     }
+
+    /**
+     * Update a module setting value in optimus_bytes_woo_kit_settings
+     *
+     * @param string $key
+     * @param mixed $value
+     * @return bool
+     */
+    public function update_option($key, $value) {
+        $options            = get_option(OBWK_SETTINGS_OPTION, array());
+        $full_key           = $this->id . '_' . $key;
+        $options[$full_key] = $value;
+        return update_option(OBWK_SETTINGS_OPTION, $options);
+    }
+
+    /**
+     * Initialize module hooks and behavior
+     */
+    abstract public function init();
 }

@@ -35,18 +35,18 @@ class Admin_Menu {
     public function init() {
         add_action('admin_menu', array($this, 'register_admin_menu'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
+        add_action('wp_ajax_obwk_toggle_module', array($this, 'handle_toggle_module_ajax'));
     }
 
     /**
-     * Register Admin Menus
+     * Register Admin Menu
      */
     public function register_admin_menu() {
-        // SVG Icon for Menu
         $svg_icon = 'data:image/svg+xml;base64,' . base64_encode(
             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#a0a5aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>'
         );
 
-        // Main Menu Page
+        // Single clean Main Menu Page
         add_menu_page(
             __('Optimus Woo Kit', 'optimus-bytes-woo-kit'),
             __('Optimus Woo Kit', 'optimus-bytes-woo-kit'),
@@ -55,25 +55,6 @@ class Admin_Menu {
             array($this, 'render_dashboard_page'),
             $svg_icon,
             58
-        );
-
-        // Submenu: Modules Dashboard
-        add_submenu_page(
-            'optimus-woo-kit',
-            __('Modules & Features', 'optimus-bytes-woo-kit'),
-            __('Modules', 'optimus-bytes-woo-kit'),
-            'manage_options',
-            'optimus-woo-kit',
-            array($this, 'render_dashboard_page')
-        );
-
-        // Submenu: WhatsApp Configuration Shortcut
-        add_submenu_page(
-            'optimus-woo-kit',
-            __('WhatsApp Button Settings', 'optimus-bytes-woo-kit'),
-            __('WhatsApp Button', 'optimus-bytes-woo-kit'),
-            'manage_options',
-            'customize.php?autofocus[section]=obwk_whatsapp_section'
         );
     }
 
@@ -93,6 +74,57 @@ class Admin_Menu {
             array(),
             OBWK_VERSION
         );
+
+        wp_enqueue_script(
+            'obwk-admin-script',
+            OBWK_PLUGIN_URL . 'assets/js/admin.js',
+            array('jquery'),
+            OBWK_VERSION,
+            true
+        );
+
+        wp_localize_script('obwk-admin-script', 'obwkAdmin', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('obwk_admin_nonce'),
+            'i18n'     => array(
+                'active'   => __('Active', 'optimus-bytes-woo-kit'),
+                'disabled' => __('Disabled', 'optimus-bytes-woo-kit'),
+                'updating' => __('Updating...', 'optimus-bytes-woo-kit'),
+                'saved'    => __('Settings saved in plugin option successfully.', 'optimus-bytes-woo-kit'),
+                'error'    => __('Failed to update module status. Please try again.', 'optimus-bytes-woo-kit'),
+            ),
+        ));
+    }
+
+    /**
+     * AJAX Handler to Toggle Module Enable/Disable State in optimus_bytes_woo_kit_settings
+     */
+    public function handle_toggle_module_ajax() {
+        check_ajax_referer('obwk_admin_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('Unauthorized permission.', 'optimus-bytes-woo-kit')));
+        }
+
+        $module_id = isset($_POST['module_id']) ? sanitize_key($_POST['module_id']) : '';
+        $enable    = isset($_POST['enable']) ? filter_var($_POST['enable'], FILTER_VALIDATE_BOOLEAN) : false;
+
+        if (empty($module_id)) {
+            wp_send_json_error(array('message' => __('Invalid module ID.', 'optimus-bytes-woo-kit')));
+        }
+
+        // Store directly inside plugin option: optimus_bytes_woo_kit_settings
+        $options = get_option(OBWK_SETTINGS_OPTION, array());
+        $options[$module_id . '_enable'] = $enable;
+        update_option(OBWK_SETTINGS_OPTION, $options);
+
+        wp_send_json_success(array(
+            'message' => $enable
+                ? __('Module enabled successfully.', 'optimus-bytes-woo-kit')
+                : __('Module disabled successfully.', 'optimus-bytes-woo-kit'),
+            'enabled' => $enable,
+            'module'  => $module_id,
+        ));
     }
 
     /**
@@ -101,7 +133,7 @@ class Admin_Menu {
     public function render_dashboard_page() {
         $modules = $this->plugin->get_modules();
 
-        // Sample upcoming modules to display in the kit roadmap
+        // Upcoming modules roadmap
         $upcoming_modules = array(
             array(
                 'title'       => __('Sticky Add to Cart Bar', 'optimus-bytes-woo-kit'),
@@ -118,11 +150,11 @@ class Admin_Menu {
                 'category'    => __('Marketing', 'optimus-bytes-woo-kit'),
             ),
             array(
-                'title'       => __('Direct WhatsApp Order Inquiries', 'optimus-bytes-woo-kit'),
-                'description' => __('Add instant "Order via WhatsApp" button on product pages for customers who prefer chatting with staff directly.', 'optimus-bytes-woo-kit'),
-                'icon'        => '💬',
+                'title'       => __('Automated Order Status WhatsApp Alerts', 'optimus-bytes-woo-kit'),
+                'description' => __('Send automatic WhatsApp notifications when orders are placed, dispatched, or completed.', 'optimus-bytes-woo-kit'),
+                'icon'        => '📦',
                 'badge'       => __('Available Soon', 'optimus-bytes-woo-kit'),
-                'category'    => __('Customer Care', 'optimus-bytes-woo-kit'),
+                'category'    => __('Notifications', 'optimus-bytes-woo-kit'),
             ),
         );
         ?>
@@ -135,7 +167,7 @@ class Admin_Menu {
                     </div>
                     <div>
                         <h1 class="obwk-title"><?php esc_html_e('Optimus Bytes Woo Kit', 'optimus-bytes-woo-kit'); ?></h1>
-                        <p class="obwk-subtitle"><?php esc_html_e('Modular eCommerce Suite & Growth Toolkit for WooCommerce — Built by Optimus Bytes Technologies', 'optimus-bytes-woo-kit'); ?></p>
+                        <p class="obwk-subtitle"><?php esc_html_e('Modular eCommerce Suite & Growth Toolkit for WooCommerce — Powered by Optimus Bytes Technologies', 'optimus-bytes-woo-kit'); ?></p>
                     </div>
                 </div>
                 <div class="obwk-header-actions">
@@ -148,8 +180,8 @@ class Admin_Menu {
 
             <!-- Dashboard Subtitle -->
             <div class="obwk-section-heading">
-                <h2><?php esc_html_e('Available Modules & Utilities', 'optimus-bytes-woo-kit'); ?></h2>
-                <p><?php esc_html_e('Configure and manage modules below. Click on any module to open its live settings.', 'optimus-bytes-woo-kit'); ?></p>
+                <h2><?php esc_html_e('Installed Modules & Utilities', 'optimus-bytes-woo-kit'); ?></h2>
+                <p><?php esc_html_e('All options are saved in the standalone "optimus_bytes_woo_kit_settings" option. Use the switches below to toggle features instantly.', 'optimus-bytes-woo-kit'); ?></p>
             </div>
 
             <!-- Active Modules Grid -->
@@ -161,15 +193,24 @@ class Admin_Menu {
                     $badge_class  = $is_enabled ? 'obwk-badge-active' : 'obwk-badge-inactive';
                     $badge_text   = $is_enabled ? __('Active', 'optimus-bytes-woo-kit') : __('Disabled', 'optimus-bytes-woo-kit');
                     ?>
-                    <div class="obwk-module-card <?php echo $is_enabled ? 'is-active' : ''; ?>">
+                    <div class="obwk-module-card <?php echo $is_enabled ? 'is-active' : ''; ?>" data-module-card="<?php echo esc_attr($module->get_id()); ?>">
                         <div class="obwk-card-header">
                             <div class="obwk-module-icon">
                                 <?php echo esc_html($module->get_icon()); ?>
                             </div>
                             <div class="obwk-card-meta">
-                                <span class="obwk-badge <?php echo esc_attr($badge_class); ?>">
-                                    <span class="obwk-dot"></span> <?php echo esc_html($badge_text); ?>
-                                </span>
+                                <div class="obwk-toggle-control">
+                                    <label class="obwk-switch" title="<?php esc_attr_e('Enable / Disable Module', 'optimus-bytes-woo-kit'); ?>">
+                                        <input type="checkbox" 
+                                               class="obwk-module-toggle" 
+                                               data-module="<?php echo esc_attr($module->get_id()); ?>" 
+                                               <?php checked($is_enabled, true); ?>>
+                                        <span class="obwk-slider"></span>
+                                    </label>
+                                    <span class="obwk-badge <?php echo esc_attr($badge_class); ?>">
+                                        <span class="obwk-dot"></span> <span class="obwk-badge-text"><?php echo esc_html($badge_text); ?></span>
+                                    </span>
+                                </div>
                                 <span class="obwk-category-tag"><?php echo esc_html($module->get_category()); ?></span>
                             </div>
                         </div>
@@ -188,7 +229,7 @@ class Admin_Menu {
                     </div>
                 <?php endforeach; ?>
 
-                <!-- Upcoming Extensible Modules -->
+                <!-- Upcoming Modules Roadmap -->
                 <?php foreach ($upcoming_modules as $upcoming) : ?>
                     <div class="obwk-module-card is-upcoming">
                         <div class="obwk-card-header">
@@ -210,7 +251,7 @@ class Admin_Menu {
 
                         <div class="obwk-card-footer">
                             <button type="button" class="obwk-btn obwk-btn-disabled" disabled>
-                                <?php esc_html_e('Modular Ready', 'optimus-bytes-woo-kit'); ?>
+                                <?php esc_html_e('Module Ready in Core', 'optimus-bytes-woo-kit'); ?>
                             </button>
                         </div>
                     </div>
