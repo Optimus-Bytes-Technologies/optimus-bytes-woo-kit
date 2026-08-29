@@ -31,13 +31,13 @@ class Product_WhatsApp_Module extends Abstract_Module {
         add_action('customize_register', array($this, 'register_customizer_settings'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
 
-        // Hook button on single product page
-        $hook = $this->get_option('hook_position', 'woocommerce_after_add_to_cart_button');
+        // Hook button on single product page after add-to-cart form
+        $hook = $this->get_option('hook_position', 'woocommerce_after_add_to_cart_form');
         if (empty($hook)) {
-            $hook = 'woocommerce_after_add_to_cart_button';
+            $hook = 'woocommerce_after_add_to_cart_form';
         }
 
-        add_action($hook, array($this, 'render_order_on_whatsapp_button'), 25);
+        add_action($hook, array($this, 'render_order_on_whatsapp_button'), 1);
     }
 
     /**
@@ -64,6 +64,25 @@ class Product_WhatsApp_Module extends Abstract_Module {
             'label'    => __('Enable "Order on WhatsApp" Button', 'optimus-bytes-woo-kit'),
             'section'  => $section_id,
             'type'     => 'checkbox',
+        ));
+
+        // Placement Position
+        $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[product_whatsapp_hook_position]', array(
+            'type'              => 'option',
+            'default'           => 'woocommerce_after_add_to_cart_form',
+            'sanitize_callback' => 'sanitize_text_field',
+        ));
+        $wp_customize->add_control(OBWK_SETTINGS_OPTION . '[product_whatsapp_hook_position]', array(
+            'label'       => __('Button Placement Position', 'optimus-bytes-woo-kit'),
+            'description' => __('Choose where the Order on WhatsApp button appears on the product page.', 'optimus-bytes-woo-kit'),
+            'section'     => $section_id,
+            'type'        => 'select',
+            'choices'     => array(
+                'woocommerce_after_add_to_cart_form'   => __('After Add to Cart Form (Recommended)', 'optimus-bytes-woo-kit'),
+                'woocommerce_after_add_to_cart_button' => __('After Add to Cart Button (Inside Form)', 'optimus-bytes-woo-kit'),
+                'woocommerce_before_add_to_cart_form'  => __('Before Add to Cart Form', 'optimus-bytes-woo-kit'),
+                'woocommerce_product_meta_end'         => __('After Product Meta', 'optimus-bytes-woo-kit'),
+            ),
         ));
 
         // Button Text
