@@ -20,7 +20,7 @@ class Color_Filter_Module extends Abstract_Module {
     public function __construct() {
         $this->id          = 'color_filter';
         $this->title       = __('Color Swatch Filter Widget & Shortcode', 'optimus-bytes-woo-kit');
-        $this->description = __('Visual color swatch filter for shop and archive sidebars with multi-select support, product counts, and clean URLs.', 'optimus-bytes-woo-kit');
+        $this->description = __('Visual color swatch filter for shop and archive sidebars with category-aware product counts, multi-select, and full query parameter retention.', 'optimus-bytes-woo-kit');
         $this->icon        = '🎯';
         $this->category    = __('Product & UX', 'optimus-bytes-woo-kit');
     }
@@ -116,6 +116,19 @@ class Color_Filter_Module extends Abstract_Module {
             'type'     => 'checkbox',
         ));
 
+        // Hide Empty Terms
+        $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[color_filter_hide_empty]', array(
+            'type'              => 'option',
+            'default'           => true,
+            'sanitize_callback' => 'wp_validate_boolean',
+        ));
+        $wp_customize->add_control(OBWK_SETTINGS_OPTION . '[color_filter_hide_empty]', array(
+            'label'       => __('Hide colors with 0 products in current filtered view', 'optimus-bytes-woo-kit'),
+            'description' => __('Only shows colors that match the current category, stock status, and active filters.', 'optimus-bytes-woo-kit'),
+            'section'     => $section_id,
+            'type'        => 'checkbox',
+        ));
+
         // Show Clear Button
         $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[color_filter_show_clear]', array(
             'type'              => 'option',
@@ -148,6 +161,265 @@ class Color_Filter_Module extends Abstract_Module {
     }
 
     /**
+     * Extract active taxonomy filters from $_GET query parameters (e.g. filter_size=30ml, filter_fabric=silk)
+     *
+     * @param string $exclude_taxonomy (Taxonomy to exclude, e.g. pa_color)
+     * @return array (taxonomy => array of term_slugs)
+     */
+    public static function get_active_other_filters($exclude_taxonomy = 'pa_color') {
+        $other_filters = array();
+
+        if (empty($_GET) || !is_array($_GET)) {
+            return $other_filters;
+        }
+
+        foreach ($_GET as $key => $value) {
+            if (0 === strpos($key, 'filter_')) {
+                $raw_tax = str_replace('filter_', '', $key);
+                
+                // Exclude stock status and current color taxonomy
+                if ('stock_status' === $raw_tax || 'on_sale' === $raw_tax) {
+                    continue;
+                }
+
+                $tax_name = (0 === strpos($raw_tax, 'pa_')) ? $raw_tax : 'pa_' . $raw_tax;
+
+                if ($tax_name === $exclude_taxonomy) {
+                    continue;
+                }
+
+                if (taxonomy_exists($tax_name)) {
+                    $slugs = explode(',', sanitize_text_field(wp_unslash($value)));
+                    $slugs = array_filter(array_map('sanitize_title', $slugs));
+                    if (!empty($slugs)) {
+                        $other_filters[$tax_name] = $slugs;
+                    }
+                }
+            }
+        }
+
+        return $other_filters;
+    }
+
+    /**
+     * Calculate accurate filtered term product counts based on Category, Subcategories, Stock Status, and all active URL filters
+     *
+     * @param array $terms
+     * @param string $taxonomy
+     * @param string $query_type
+     * @return array (term_id => int count)
+     */
+    public static function get_contextual_term_counts($terms, $taxonomy, $query_type = 'or') {
+        if (empty($terms)) {
+            return array();
+        }
+
+        $term_ids = wp_list_pluck($terms, 'term_id');
+        $counts   = array();
+
+        // 1. If WooCommerce core layered nav counts are available and accurate
+        if (function_exists('wc_get_filtered_term_product_counts')) {
+            $wc_counts = wc_get_filtered_term_product_counts($term_ids, $taxonomy, $query_type);
+            if (!empty($wc_counts) && is_array($wc_counts)) {
+                return $wc_counts;
+            }
+        }
+
+        // 2. Comprehensive SQL Query respecting Categories, Stock Status, Attributes, Prices
+        global $wpdb;
+        $current_obj   = get_queried_object();
+        $other_filters = self::get_active_other_filters($taxonomy);
+
+        // Resolve Category Term IDs (from queried object or ?product_cat / ?category / ?categories)
+        $cat_ids = array();
+        if ($current_obj instanceof \WP_Term && 'product_cat' === $current_obj->taxonomy) {
+            $cat_ids[] = (int) $current_obj->term_id;
+        }
+
+        // Check GET category parameters (?categories=eyes, ?category=eyes, ?product_cat=eyes)
+        $cat_get_keys = array('product_cat', 'category', 'categories');
+        foreach ($cat_get_keys as $ckey) {
+            if (!empty($_GET[$ckey])) {
+                $cat_slugs = explode(',', sanitize_text_field(wp_unslash($_GET[$ckey])));
+                foreach ($cat_slugs as $cslug) {
+                    $cslug = sanitize_title(trim($cslug));
+                    if (!empty($cslug)) {
+                        $c_term = get_term_by('slug', $cslug, 'product_cat');
+                        if ($c_term) {
+                            $cat_ids[] = (int) $c_term->term_id;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Expand category hierarchy (include all subcategories)
+        $all_cat_ids = array();
+        foreach ($cat_ids as $cid) {
+            $all_cat_ids[] = $cid;
+            $children = get_term_children($cid, 'product_cat');
+            if (!empty($children) && !is_wp_error($children)) {
+                $all_cat_ids = array_merge($all_cat_ids, $children);
+            }
+        }
+        $all_cat_ids = array_unique($all_cat_ids);
+        $cat_ids_str = !empty($all_cat_ids) ? implode(',', array_map('intval', $all_cat_ids)) : '';
+
+        // Stock status filter (e.g. ?filter_stock_status=instock)
+        $stock_filter = '';
+        if (!empty($_GET['filter_stock_status'])) {
+            $raw_stock = sanitize_text_field(wp_unslash($_GET['filter_stock_status']));
+            $allowed_stocks = array('instock', 'outofstock', 'onbackorder');
+            $stocks = explode(',', $raw_stock);
+            $valid_stocks = array_intersect($stocks, $allowed_stocks);
+            if (!empty($valid_stocks)) {
+                $stock_filter = "'" . implode("','", array_map('esc_sql', $valid_stocks)) . "'";
+            }
+        }
+
+        // Price filters
+        $min_price = isset($_GET['min_price']) ? floatval($_GET['min_price']) : 0;
+        $max_price = isset($_GET['max_price']) ? floatval($_GET['max_price']) : 0;
+
+        // Build other filter taxonomy joins
+        $other_joins = '';
+        $other_where = '';
+        $other_var_where = '';
+        $idx = 0;
+
+        foreach ($other_filters as $other_tax => $slugs) {
+            $idx++;
+            $slugs_in = "'" . implode("','", array_map('esc_sql', $slugs)) . "'";
+            
+            $other_joins .= "
+                INNER JOIN {$wpdb->term_relationships} tr_other_{$idx} ON (p.ID = tr_other_{$idx}.object_id)
+                INNER JOIN {$wpdb->term_taxonomy} tt_other_{$idx} ON (tr_other_{$idx}.term_taxonomy_id = tt_other_{$idx}.term_taxonomy_id AND tt_other_{$idx}.taxonomy = '{$other_tax}')
+                INNER JOIN {$wpdb->terms} t_other_{$idx} ON (tt_other_{$idx}.term_id = t_other_{$idx}.term_id)
+            ";
+            $other_where .= " AND t_other_{$idx}.slug IN ({$slugs_in}) ";
+
+            $meta_key_tax = 'attribute_' . $other_tax;
+            $other_var_where .= "
+                AND EXISTS (
+                    SELECT 1 FROM {$wpdb->postmeta} pm_other_{$idx} 
+                    WHERE pm_other_{$idx}.post_id = p.ID 
+                    AND pm_other_{$idx}.meta_key = '{$meta_key_tax}' 
+                    AND (pm_other_{$idx}.meta_value IN ({$slugs_in}) OR pm_other_{$idx}.meta_value = '')
+                )
+            ";
+        }
+
+        // Check if WooCommerce lookup table exists
+        $lookup_table = $wpdb->prefix . 'wc_product_meta_lookup';
+        $has_lookup = (bool) $wpdb->get_var("SHOW TABLES LIKE '{$lookup_table}'");
+
+        foreach ($terms as $term) {
+            $cat_join_clause  = "";
+            $cat_where_clause = "";
+
+            if (!empty($cat_ids_str)) {
+                $cat_join_clause = "
+                    INNER JOIN {$wpdb->term_relationships} tr_cat ON (p.ID = tr_cat.object_id)
+                    INNER JOIN {$wpdb->term_taxonomy} tt_cat ON (tr_cat.term_taxonomy_id = tt_cat.term_taxonomy_id AND tt_cat.taxonomy = 'product_cat')
+                ";
+                $cat_where_clause = " AND tt_cat.term_id IN ({$cat_ids_str}) ";
+            }
+
+            $stock_join = "";
+            $stock_where = "";
+            $price_join = "";
+            $price_where = "";
+
+            if ($has_lookup) {
+                $stock_join = " INNER JOIN {$lookup_table} ml ON (p.ID = ml.product_id) ";
+                if (!empty($stock_filter)) {
+                    $stock_where = " AND ml.stock_status IN ({$stock_filter}) ";
+                }
+                if ($min_price > 0) {
+                    $price_where .= " AND ml.min_price >= {$min_price} ";
+                }
+                if ($max_price > 0) {
+                    $price_where .= " AND ml.max_price <= {$max_price} ";
+                }
+            } else {
+                if (!empty($stock_filter)) {
+                    $stock_join = " INNER JOIN {$wpdb->postmeta} pm_stock ON (p.ID = pm_stock.post_id AND pm_stock.meta_key = '_stock_status') ";
+                    $stock_where = " AND pm_stock.meta_value IN ({$stock_filter}) ";
+                }
+                if ($min_price > 0 || $max_price > 0) {
+                    $price_join = " INNER JOIN {$wpdb->postmeta} pm_price ON (p.ID = pm_price.post_id AND pm_price.meta_key = '_price') ";
+                    if ($min_price > 0) {
+                        $price_where .= " AND CAST(pm_price.meta_value AS DECIMAL(10,2)) >= {$min_price} ";
+                    }
+                    if ($max_price > 0) {
+                        $price_where .= " AND CAST(pm_price.meta_value AS DECIMAL(10,2)) <= {$max_price} ";
+                    }
+                }
+            }
+
+            // Query 1: Simple products matching this color + stock + category + other filters
+            $sql = "
+                SELECT COUNT(DISTINCT p.ID) 
+                FROM {$wpdb->posts} p
+                {$cat_join_clause}
+                INNER JOIN {$wpdb->term_relationships} tr_attr ON (p.ID = tr_attr.object_id)
+                {$other_joins}
+                {$stock_join}
+                {$price_join}
+                WHERE p.post_type IN ('product')
+                AND p.post_status = 'publish'
+                {$cat_where_clause}
+                AND tr_attr.term_taxonomy_id = %d
+                {$other_where}
+                {$stock_where}
+                {$price_where}
+            ";
+            $count = (int) $wpdb->get_var($wpdb->prepare($sql, $term->term_taxonomy_id));
+
+            // Query 2: Variable product variations matching this color + stock + category + other filters
+            $var_cat_join = "";
+            $var_cat_where = "";
+            if (!empty($cat_ids_str)) {
+                $var_cat_join = "
+                    INNER JOIN {$wpdb->term_relationships} tr_cat ON (p.post_parent = tr_cat.object_id)
+                    INNER JOIN {$wpdb->term_taxonomy} tt_cat ON (tr_cat.term_taxonomy_id = tt_cat.term_taxonomy_id AND tt_cat.taxonomy = 'product_cat')
+                ";
+                $var_cat_where = " AND tt_cat.term_id IN ({$cat_ids_str}) ";
+            }
+
+            $var_stock_where = "";
+            if (!empty($stock_filter)) {
+                $var_stock_where = " 
+                    AND EXISTS (
+                        SELECT 1 FROM {$wpdb->postmeta} pm_vstock 
+                        WHERE pm_vstock.post_id = p.ID 
+                        AND pm_vstock.meta_key = '_stock_status' 
+                        AND pm_vstock.meta_value IN ({$stock_filter})
+                    )
+                ";
+            }
+
+            $var_sql = "
+                SELECT COUNT(DISTINCT p.post_parent) 
+                FROM {$wpdb->posts} p
+                {$var_cat_join}
+                INNER JOIN {$wpdb->postmeta} pm_color ON (p.ID = pm_color.post_id AND pm_color.meta_key = %s)
+                WHERE p.post_type = 'product_variation'
+                AND p.post_status = 'publish'
+                {$var_cat_where}
+                AND (pm_color.meta_value = %s OR pm_color.meta_value = '')
+                {$other_var_where}
+                {$var_stock_where}
+            ";
+            $var_count = (int) $wpdb->get_var($wpdb->prepare($var_sql, 'attribute_' . $taxonomy, $term->slug));
+
+            $counts[$term->term_id] = max($count, $var_count);
+        }
+
+        return $counts;
+    }
+
+    /**
      * Render Shortcode: [obwk_color_filter]
      *
      * @param array $atts
@@ -164,6 +436,7 @@ class Color_Filter_Module extends Abstract_Module {
             'layout'     => $this->get_option('layout', 'grid'),
             'shape'      => $this->get_option('shape', 'rounded'),
             'show_count' => (bool) $this->get_option('show_count', true),
+            'hide_empty' => (bool) $this->get_option('hide_empty', true),
             'show_clear' => (bool) $this->get_option('show_clear', true),
         ), $atts, 'obwk_color_filter');
 
@@ -173,7 +446,7 @@ class Color_Filter_Module extends Abstract_Module {
     }
 
     /**
-     * Helper to render Color Filter HTML
+     * Helper to render Color Filter HTML with contextual counts and 100% query parameter retention
      *
      * @param array $args
      */
@@ -189,7 +462,7 @@ class Color_Filter_Module extends Abstract_Module {
 
         $terms = get_terms(array(
             'taxonomy'   => $attribute_name,
-            'hide_empty' => true,
+            'hide_empty' => false,
         ));
 
         if (empty($terms) || is_wp_error($terms)) {
@@ -199,16 +472,34 @@ class Color_Filter_Module extends Abstract_Module {
         $layout     = !empty($args['layout']) ? $args['layout'] : 'grid';
         $shape      = !empty($args['shape']) ? $args['shape'] : 'rounded';
         $show_count = isset($args['show_count']) ? (bool) $args['show_count'] : true;
+        $hide_empty = isset($args['hide_empty']) ? (bool) $args['hide_empty'] : true;
         $show_clear = isset($args['show_clear']) ? (bool) $args['show_clear'] : true;
         $title      = !empty($args['title']) ? $args['title'] : '';
 
-        // Determine currently active filters from query parameter
-        $param_key = 'filter_' . sanitize_title(str_replace('pa_', '', $attribute_name));
-        $current_filter = isset($_GET[$param_key]) ? explode(',', sanitize_text_field(wp_unslash($_GET[$param_key]))) : array();
-        $current_filter = array_map('sanitize_title', $current_filter);
+        // Calculate contextual counts for current category and all active query filters
+        $counts = self::get_contextual_term_counts($terms, $attribute_name, 'or');
 
-        // Base URL for links
-        $current_url = remove_query_arg('paged');
+        // Clean taxonomy slug without 'pa_' (e.g. 'color')
+        $clean_attr_name = sanitize_title(str_replace('pa_', '', $attribute_name));
+        $param_key       = 'filter_' . $clean_attr_name;
+        $query_type_key  = 'query_type_' . $clean_attr_name;
+
+        // Determine currently active filters for this specific attribute
+        $current_color_filter = isset($_GET[$param_key]) ? explode(',', sanitize_text_field(wp_unslash($_GET[$param_key]))) : array();
+        $current_color_filter = array_filter(array_map('sanitize_title', $current_color_filter));
+
+        // Get clean base URL without query parameters
+        global $wp;
+        if (!empty($wp->request)) {
+            $base_url = home_url($wp->request);
+        } else {
+            $raw_uri  = isset($_SERVER['REQUEST_URI']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : '';
+            $base_url = strtok($raw_uri, '?');
+        }
+
+        // Clone all active GET params while omitting pagination
+        $current_all_params = !empty($_GET) && is_array($_GET) ? wp_unslash($_GET) : array();
+        unset($current_all_params['paged']);
 
         ?>
         <div class="obwk-color-filter-widget obwk-filter-layout-<?php echo esc_attr($layout); ?> obwk-filter-shape-<?php echo esc_attr($shape); ?>">
@@ -216,8 +507,12 @@ class Color_Filter_Module extends Abstract_Module {
                 <h3 class="obwk-filter-title"><?php echo esc_html($title); ?></h3>
             <?php endif; ?>
 
-            <?php if ($show_clear && !empty($current_filter)) : 
-                $clear_url = remove_query_arg(array($param_key, 'query_type_' . sanitize_title(str_replace('pa_', '', $attribute_name))), $current_url);
+            <?php if ($show_clear && !empty($current_color_filter)) : 
+                // Clear URL retains all other filters (e.g. filter_stock_status, categories, etc.)
+                $clear_params = $current_all_params;
+                unset($clear_params[$param_key]);
+                unset($clear_params[$query_type_key]);
+                $clear_url = !empty($clear_params) ? add_query_arg($clear_params, $base_url) : $base_url;
             ?>
                 <div class="obwk-filter-clear-wrap">
                     <a href="<?php echo esc_url($clear_url); ?>" class="obwk-filter-clear-btn">
@@ -228,32 +523,41 @@ class Color_Filter_Module extends Abstract_Module {
 
             <ul class="obwk-color-filter-list">
                 <?php foreach ($terms as $term) : 
+                    $term_id     = $term->term_id;
                     $term_slug   = $term->slug;
                     $term_name   = $term->name;
-                    $term_count  = $term->count;
-                    $is_active   = in_array($term_slug, $current_filter, true);
+                    $term_count  = isset($counts[$term_id]) ? (int) $counts[$term_id] : 0;
+                    $is_active   = in_array($term_slug, $current_color_filter, true);
+
+                    // Skip empty colors in current filter context if hide_empty is enabled and not active
+                    if ($hide_empty && $term_count === 0 && !$is_active) {
+                        continue;
+                    }
+
                     $color_hex   = class_exists('OptimusBytes\WooKit\Modules\Variation_Swatches\Variation_Swatches_Module') 
                         ? Variation_Swatches_Module::resolve_color_hex($term) 
                         : '#a46d35';
 
-                    // Build toggle URL (Multi-select)
-                    $new_filter = $current_filter;
+                    // Build toggle URL while preserving ALL existing query parameters (categories, filter_stock_status, filter_size, etc.)
+                    $new_color_filter = $current_color_filter;
                     if ($is_active) {
-                        $new_filter = array_diff($new_filter, array($term_slug));
+                        $new_color_filter = array_diff($new_color_filter, array($term_slug));
                     } else {
-                        $new_filter[] = $term_slug;
+                        $new_color_filter[] = $term_slug;
                     }
 
-                    if (!empty($new_filter)) {
-                        $link_url = add_query_arg(array(
-                            $param_key => implode(',', $new_filter),
-                            'query_type_' . sanitize_title(str_replace('pa_', '', $attribute_name)) => 'or',
-                        ), $current_url);
+                    $link_params = $current_all_params;
+                    if (!empty($new_color_filter)) {
+                        $link_params[$param_key]      = implode(',', $new_color_filter);
+                        $link_params[$query_type_key] = 'or';
                     } else {
-                        $link_url = remove_query_arg(array($param_key, 'query_type_' . sanitize_title(str_replace('pa_', '', $attribute_name))), $current_url);
+                        unset($link_params[$param_key]);
+                        unset($link_params[$query_type_key]);
                     }
+
+                    $link_url = !empty($link_params) ? add_query_arg($link_params, $base_url) : $base_url;
                 ?>
-                    <li class="obwk-filter-item <?php echo $is_active ? 'is-active' : ''; ?>">
+                    <li class="obwk-filter-item <?php echo $is_active ? 'is-active' : ''; ?> <?php echo ($term_count === 0) ? 'is-count-zero' : ''; ?>">
                         <a href="<?php echo esc_url($link_url); ?>" 
                            class="obwk-filter-link" 
                            title="<?php echo esc_attr($term_name . ' (' . $term_count . ')'); ?>" 
@@ -312,6 +616,7 @@ if (class_exists('\WP_Widget')) {
             $layout     = !empty($instance['layout']) ? $instance['layout'] : 'grid';
             $shape      = !empty($instance['shape']) ? $instance['shape'] : 'rounded';
             $show_count = isset($instance['show_count']) ? (bool) $instance['show_count'] : true;
+            $hide_empty = isset($instance['hide_empty']) ? (bool) $instance['hide_empty'] : true;
             $show_clear = isset($instance['show_clear']) ? (bool) $instance['show_clear'] : true;
 
             Color_Filter_Module::render_filter_html(array(
@@ -320,6 +625,7 @@ if (class_exists('\WP_Widget')) {
                 'layout'     => $layout,
                 'shape'      => $shape,
                 'show_count' => $show_count,
+                'hide_empty' => $hide_empty,
                 'show_clear' => $show_clear,
             ));
 
@@ -332,6 +638,7 @@ if (class_exists('\WP_Widget')) {
             $layout     = !empty($instance['layout']) ? $instance['layout'] : 'grid';
             $shape      = !empty($instance['shape']) ? $instance['shape'] : 'rounded';
             $show_count = isset($instance['show_count']) ? (bool) $instance['show_count'] : true;
+            $hide_empty = isset($instance['hide_empty']) ? (bool) $instance['hide_empty'] : true;
             $show_clear = isset($instance['show_clear']) ? (bool) $instance['show_clear'] : true;
             ?>
             <p>
@@ -362,6 +669,10 @@ if (class_exists('\WP_Widget')) {
                 <label for="<?php echo esc_attr($this->get_field_id('show_count')); ?>"><?php esc_html_e('Show product counts', 'optimus-bytes-woo-kit'); ?></label>
             </p>
             <p>
+                <input class="checkbox" type="checkbox" <?php checked($hide_empty); ?> id="<?php echo esc_attr($this->get_field_id('hide_empty')); ?>" name="<?php echo esc_attr($this->get_field_name('hide_empty')); ?>" />
+                <label for="<?php echo esc_attr($this->get_field_id('hide_empty')); ?>"><?php esc_html_e('Hide colors with 0 products in category', 'optimus-bytes-woo-kit'); ?></label>
+            </p>
+            <p>
                 <input class="checkbox" type="checkbox" <?php checked($show_clear); ?> id="<?php echo esc_attr($this->get_field_id('show_clear')); ?>" name="<?php echo esc_attr($this->get_field_name('show_clear')); ?>" />
                 <label for="<?php echo esc_attr($this->get_field_id('show_clear')); ?>"><?php esc_html_e('Show "Clear Filter" button', 'optimus-bytes-woo-kit'); ?></label>
             </p>
@@ -375,6 +686,7 @@ if (class_exists('\WP_Widget')) {
             $instance['layout']     = (!empty($new_instance['layout'])) ? sanitize_text_field($new_instance['layout']) : 'grid';
             $instance['shape']      = (!empty($new_instance['shape'])) ? sanitize_text_field($new_instance['shape']) : 'rounded';
             $instance['show_count'] = isset($new_instance['show_count']) ? (bool) $new_instance['show_count'] : false;
+            $instance['hide_empty'] = isset($new_instance['hide_empty']) ? (bool) $new_instance['hide_empty'] : false;
             $instance['show_clear'] = isset($new_instance['show_clear']) ? (bool) $new_instance['show_clear'] : false;
             return $instance;
         }
