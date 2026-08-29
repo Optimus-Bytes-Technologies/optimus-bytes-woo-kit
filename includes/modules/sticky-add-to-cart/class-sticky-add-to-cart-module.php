@@ -19,7 +19,7 @@ class Sticky_Add_To_Cart_Module extends Abstract_Module {
     public function __construct() {
         $this->id          = 'sticky_add_to_cart';
         $this->title       = __('Sticky Add to Cart & Buy Now Bar', 'optimus-bytes-woo-kit');
-        $this->description = __('Floating purchase bar with options for fixed or on-scroll display, theme inheritance, live price, quantity stepper, and 1-Click Buy Now direct checkout.', 'optimus-bytes-woo-kit');
+        $this->description = __('Floating purchase bar with options for fixed or on-scroll display, theme inheritance, live price, quantity stepper, View Cart counter, and 1-Click Buy Now direct checkout.', 'optimus-bytes-woo-kit');
         $this->icon        = '🛒';
         $this->category    = __('Conversions & Checkout', 'optimus-bytes-woo-kit');
     }
@@ -32,8 +32,23 @@ class Sticky_Add_To_Cart_Module extends Abstract_Module {
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
         add_action('wp_footer', array($this, 'render_sticky_bar'), 30);
 
+        // Add cart count fragment to WooCommerce AJAX refresh
+        add_filter('woocommerce_add_to_cart_fragments', array($this, 'add_cart_fragments'));
+
         // Handle 1-Click Buy Now direct checkout redirection
         add_filter('woocommerce_add_to_cart_redirect', array($this, 'handle_buy_now_redirect'), 999, 2);
+    }
+
+    /**
+     * Add cart counter to WooCommerce AJAX fragments
+     *
+     * @param array $fragments
+     * @return array
+     */
+    public function add_cart_fragments($fragments) {
+        $count = WC()->cart ? WC()->cart->get_cart_contents_count() : 0;
+        $fragments['span.obwk-cart-count-badge'] = '<span class="obwk-cart-count-badge" data-count="' . esc_attr($count) . '">' . esc_html($count) . '</span>';
+        return $fragments;
     }
 
     /**
@@ -128,6 +143,18 @@ class Sticky_Add_To_Cart_Module extends Abstract_Module {
             ),
         ));
 
+        // Add to Cart Button Text
+        $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[sticky_add_to_cart_cart_btn_text]', array(
+            'type'              => 'option',
+            'default'           => 'Add to Cart',
+            'sanitize_callback' => 'sanitize_text_field',
+        ));
+        $wp_customize->add_control(OBWK_SETTINGS_OPTION . '[sticky_add_to_cart_cart_btn_text]', array(
+            'label'    => __('Add to Cart Button Text', 'optimus-bytes-woo-kit'),
+            'section'  => $section_id,
+            'type'     => 'text',
+        ));
+
         // Enable Buy Now Button
         $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[sticky_add_to_cart_enable_buynow]', array(
             'type'              => 'option',
@@ -141,18 +168,6 @@ class Sticky_Add_To_Cart_Module extends Abstract_Module {
             'type'        => 'checkbox',
         ));
 
-        // Add to Cart Button Text
-        $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[sticky_add_to_cart_cart_btn_text]', array(
-            'type'              => 'option',
-            'default'           => 'Add to Cart',
-            'sanitize_callback' => 'sanitize_text_field',
-        ));
-        $wp_customize->add_control(OBWK_SETTINGS_OPTION . '[sticky_add_to_cart_cart_btn_text]', array(
-            'label'    => __('Add to Cart Button Text', 'optimus-bytes-woo-kit'),
-            'section'  => $section_id,
-            'type'     => 'text',
-        ));
-
         // Buy Now Button Text
         $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[sticky_add_to_cart_buynow_btn_text]', array(
             'type'              => 'option',
@@ -161,6 +176,31 @@ class Sticky_Add_To_Cart_Module extends Abstract_Module {
         ));
         $wp_customize->add_control(OBWK_SETTINGS_OPTION . '[sticky_add_to_cart_buynow_btn_text]', array(
             'label'    => __('Buy Now Button Text', 'optimus-bytes-woo-kit'),
+            'section'  => $section_id,
+            'type'     => 'text',
+        ));
+
+        // Show View Cart Button with Live Item Counter
+        $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[sticky_add_to_cart_show_view_cart]', array(
+            'type'              => 'option',
+            'default'           => true,
+            'sanitize_callback' => 'wp_validate_boolean',
+        ));
+        $wp_customize->add_control(OBWK_SETTINGS_OPTION . '[sticky_add_to_cart_show_view_cart]', array(
+            'label'       => __('Show "View Cart" Button with Live Count', 'optimus-bytes-woo-kit'),
+            'description' => __('Displays a quick cart button with real-time item counter.', 'optimus-bytes-woo-kit'),
+            'section'     => $section_id,
+            'type'        => 'checkbox',
+        ));
+
+        // View Cart Button Text
+        $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[sticky_add_to_cart_view_cart_text]', array(
+            'type'              => 'option',
+            'default'           => 'View Cart',
+            'sanitize_callback' => 'sanitize_text_field',
+        ));
+        $wp_customize->add_control(OBWK_SETTINGS_OPTION . '[sticky_add_to_cart_view_cart_text]', array(
+            'label'    => __('View Cart Button Text', 'optimus-bytes-woo-kit'),
             'section'  => $section_id,
             'type'     => 'text',
         ));
@@ -202,6 +242,7 @@ class Sticky_Add_To_Cart_Module extends Abstract_Module {
         );
 
         wp_localize_script('obwk-sticky-cart-script', 'obwkStickyCart', array(
+            'cart_url'     => wc_get_cart_url(),
             'checkout_url' => wc_get_checkout_url(),
             'i18n'         => array(
                 'adding'     => __('Adding...', 'optimus-bytes-woo-kit'),
@@ -228,20 +269,23 @@ class Sticky_Add_To_Cart_Module extends Abstract_Module {
             return;
         }
 
-        $trigger_mode  = $this->get_option('trigger', 'on_scroll');
-        $position      = $this->get_option('position', 'bottom');
-        $enable_buynow = (bool) $this->get_option('enable_buynow', true);
-        $cart_btn_text = $this->get_option('cart_btn_text', __('Add to Cart', 'optimus-bytes-woo-kit'));
-        $buynow_btn    = $this->get_option('buynow_btn_text', __('Buy Now', 'optimus-bytes-woo-kit'));
-        $show_qty      = (bool) $this->get_option('show_qty', true);
-        $theme_style   = $this->get_option('style', 'inherit_theme');
+        $trigger_mode   = $this->get_option('trigger', 'on_scroll');
+        $position       = $this->get_option('position', 'bottom');
+        $enable_buynow  = (bool) $this->get_option('enable_buynow', true);
+        $show_view_cart = (bool) $this->get_option('show_view_cart', true);
+        $view_cart_text = $this->get_option('view_cart_text', __('View Cart', 'optimus-bytes-woo-kit'));
+        $cart_btn_text  = $this->get_option('cart_btn_text', __('Add to Cart', 'optimus-bytes-woo-kit'));
+        $buynow_btn     = $this->get_option('buynow_btn_text', __('Buy Now', 'optimus-bytes-woo-kit'));
+        $show_qty       = (bool) $this->get_option('show_qty', true);
+        $theme_style    = $this->get_option('style', 'inherit_theme');
 
-        $product_id    = $product->get_id();
-        $product_title = $product->get_name();
-        $image_id      = $product->get_image_id();
-        $image_url     = $image_id ? wp_get_attachment_image_url($image_id, 'thumbnail') : wc_placeholder_img_src('thumbnail');
-        $price_html    = $product->get_price_html();
-        $is_variable   = $product->is_type('variable');
+        $product_id     = $product->get_id();
+        $product_title  = $product->get_name();
+        $image_id       = $product->get_image_id();
+        $image_url      = $image_id ? wp_get_attachment_image_url($image_id, 'thumbnail') : wc_placeholder_img_src('thumbnail');
+        $price_html     = $product->get_price_html();
+        $is_variable    = $product->is_type('variable');
+        $cart_count     = (WC()->cart) ? WC()->cart->get_cart_contents_count() : 0;
 
         $is_always_visible = ('always_visible' === $trigger_mode);
         $visibility_class  = $is_always_visible ? 'is-visible is-always-fixed' : '';
@@ -276,18 +320,33 @@ class Sticky_Add_To_Cart_Module extends Abstract_Module {
                         </div>
                     <?php endif; ?>
 
-                    <!-- Add to Cart Button -->
-                    <button type="button" class="obwk-sticky-btn obwk-btn-add-to-cart" id="obwk-sticky-add-cart">
+                    <!-- 1. Add to Cart Button -->
+                    <button type="button" class="obwk-sticky-btn obwk-btn-add-to-cart" id="obwk-sticky-add-cart" title="<?php echo esc_attr($cart_btn_text); ?>" aria-label="<?php echo esc_attr($cart_btn_text); ?>">
                         <svg class="obwk-btn-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-                        <span class="obwk-btn-label"><?php echo esc_html($cart_btn_text); ?></span>
+                        <span class="obwk-btn-label obwk-add-cart-label"><?php echo esc_html($cart_btn_text); ?></span>
                     </button>
 
-                    <!-- Buy Now Button -->
+                    <!-- 2. Buy Now Button -->
                     <?php if ($enable_buynow) : ?>
-                        <button type="button" class="obwk-sticky-btn obwk-btn-buy-now" id="obwk-sticky-buy-now">
+                        <button type="button" class="obwk-sticky-btn obwk-btn-buy-now" id="obwk-sticky-buy-now" title="<?php echo esc_attr($buynow_btn); ?>" aria-label="<?php echo esc_attr($buynow_btn); ?>">
                             <svg class="obwk-btn-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                            <span class="obwk-btn-label"><?php echo esc_html($buynow_btn); ?></span>
+                            <span class="obwk-btn-label obwk-buy-now-label"><?php echo esc_html($buynow_btn); ?></span>
                         </button>
+                    <?php endif; ?>
+
+                    <!-- 3. View Cart Button with Live Counter (LAST) -->
+                    <?php if ($show_view_cart) : ?>
+                        <a href="<?php echo esc_url(wc_get_cart_url()); ?>" 
+                           class="obwk-sticky-btn obwk-btn-view-cart <?php echo $cart_count > 0 ? 'has-items' : 'is-empty'; ?>" 
+                           id="obwk-sticky-view-cart" 
+                           title="<?php esc_attr_e('View shopping cart', 'optimus-bytes-woo-kit'); ?>"
+                           aria-label="<?php esc_attr_e('View shopping cart', 'optimus-bytes-woo-kit'); ?>">
+                            <span class="obwk-cart-icon-wrap">
+                                <svg class="obwk-btn-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                                <span class="obwk-cart-count-badge" data-count="<?php echo esc_attr($cart_count); ?>"><?php echo esc_html($cart_count); ?></span>
+                            </span>
+                            <span class="obwk-btn-label obwk-view-cart-label"><?php echo esc_html($view_cart_text); ?></span>
+                        </a>
                     <?php endif; ?>
                 </div>
 

@@ -12,6 +12,8 @@
         const $mainAddToCartBtn = $mainForm.find('.single_add_to_cart_button');
         const $mainQtyInput = $mainForm.find('input.qty');
         const $stickyQtyInput = $stickyBar.find('.obwk-qty-input');
+        const $viewCartBtn = $('#obwk-sticky-view-cart');
+        const $badge = $('.obwk-cart-count-badge');
         const isVariable = $stickyBar.data('is-variable') === 1;
 
         // 1. Trigger Handling
@@ -31,7 +33,6 @@
 
                 const observer = new IntersectionObserver(function (entries) {
                     entries.forEach(function (entry) {
-                        // Show sticky bar only when main Add to Cart button is scrolled past out of view
                         if (!entry.isIntersecting && entry.boundingClientRect.top < 0) {
                             $stickyBar.addClass('is-visible').attr('aria-hidden', 'false');
                             $('body').addClass('obwk-sticky-cart-active');
@@ -114,7 +115,33 @@
             });
         }
 
-        // 4. Handle "Add to Cart" Button Click
+        // 4. Live WooCommerce Cart Fragments & Badge Update
+        $(document.body).on('added_to_cart removed_from_cart wc_fragments_refreshed wc_fragments_loaded', function (event, fragments) {
+            let count = null;
+
+            if (fragments && fragments['span.obwk-cart-count-badge']) {
+                $badge.replaceWith(fragments['span.obwk-cart-count-badge']);
+                count = parseInt($('span.obwk-cart-count-badge').text(), 10);
+            } else {
+                // If fragment not in payload, increment count on added_to_cart
+                const currentCount = parseInt($badge.text(), 10) || 0;
+                const addQty = parseInt($stickyQtyInput.val(), 10) || 1;
+                count = (event.type === 'added_to_cart') ? (currentCount + addQty) : currentCount;
+                $badge.text(count).attr('data-count', count);
+            }
+
+            // Animate Badge Bump
+            $('.obwk-cart-count-badge').addClass('bump');
+            setTimeout(function () {
+                $('.obwk-cart-count-badge').removeClass('bump');
+            }, 400);
+
+            if (count > 0) {
+                $viewCartBtn.removeClass('is-empty').addClass('has-items');
+            }
+        });
+
+        // 5. Handle "Add to Cart" Button Click
         $('#obwk-sticky-add-cart').on('click', function (e) {
             e.preventDefault();
             const $btn = $(this);
@@ -132,7 +159,6 @@
                 $mainQtyInput.val(qty).trigger('change');
             }
 
-            // Remove any buy now flag
             $mainForm.find('input[name="obwk_buy_now"]').remove();
 
             $btn.addClass('is-loading').prop('disabled', true);
@@ -148,7 +174,7 @@
             }, 1200);
         });
 
-        // 5. Handle 1-Click "Buy Now" Direct Checkout Button Click
+        // 6. Handle 1-Click "Buy Now" Direct Checkout Button Click
         $('#obwk-sticky-buy-now').on('click', function (e) {
             e.preventDefault();
             const $btn = $(this);
@@ -172,7 +198,6 @@
             const productId = $stickyBar.data('product-id');
             const checkoutUrl = obwkStickyCart.checkout_url;
 
-            // Collect form data to ensure all selected variations and inputs are included
             const formData = $mainForm.serializeArray();
             let hasAddToCart = false;
 
@@ -188,7 +213,6 @@
             }
             formData.push({ name: 'obwk_buy_now', value: '1' });
 
-            // Post to cart and direct to checkout page
             $.ajax({
                 type: 'POST',
                 url: $mainForm.attr('action') || window.location.href,
@@ -197,7 +221,6 @@
                     window.location.href = checkoutUrl;
                 },
                 error: function () {
-                    // Fallback to direct URL checkout redirect
                     window.location.href = checkoutUrl + '?add-to-cart=' + encodeURIComponent(productId) + '&quantity=' + encodeURIComponent(qty);
                 }
             });
