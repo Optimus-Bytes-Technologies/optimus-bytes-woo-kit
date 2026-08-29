@@ -1,0 +1,278 @@
+/* ==========================================================================
+   Optimus Bytes Woo Kit - Admin Dashboard Styles
+   ========================================================================== */
+
+.obwk-admin-wrap {
+    max-width: 1200px;
+    margin: 20px 20px 40px 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+/* Header Card */
+.obwk-header-card {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 28px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.2);
+    margin-bottom: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.obwk-header-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.obwk-logo-badge {
+    width: 54px;
+    height: 54px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    flex-shrink: 0;
+}
+
+.obwk-title {
+    margin: 0 0 6px 0 !important;
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    line-height: 1.2 !important;
+}
+
+.obwk-subtitle {
+    margin: 0;
+    font-size: 14px;
+    color: #94a3b8;
+}
+
+.obwk-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.obwk-pill-version {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Section Heading */
+.obwk-section-heading {
+    margin-bottom: 24px;
+}
+
+.obwk-section-heading h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 4px 0;
+}
+
+.obwk-section-heading p {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* Modules Grid */
+.obwk-modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 24px;
+}
+
+/* Module Card */
+.obwk-module-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.25s ease;
+    overflow: hidden;
+}
+
+.obwk-module-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.08);
+    border-color: #cbd5e1;
+}
+
+.obwk-module-card.is-active {
+    border-top: 3px solid #25d366;
+}
+
+.obwk-module-card.is-upcoming {
+    opacity: 0.85;
+    background: #f8fafc;
+    border-style: dashed;
+}
+
+/* Card Header */
+.obwk-card-header {
+    padding: 20px 20px 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.obwk-module-icon {
+    font-size: 28px;
+    width: 48px;
+    height: 48px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.obwk-card-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.obwk-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.obwk-badge-active {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.obwk-badge-inactive {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.obwk-badge-upcoming {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.obwk-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: currentColor;
+}
+
+.obwk-category-tag {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+/* Card Body */
+.obwk-card-body {
+    padding: 16px 20px;
+    flex-grow: 1;
+}
+
+.obwk-module-title {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.obwk-module-desc {
+    margin: 0;
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+/* Card Footer */
+.obwk-card-footer {
+    padding: 16px 20px;
+    background: #f8fafc;
+    border-top: 1px solid #f1f5f9;
+}
+
+/* Buttons */
+.obwk-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    box-sizing: border-box;
+}
+
+.obwk-btn-primary {
+    background: #0284c7;
+    color: #ffffff !important;
+}
+
+.obwk-btn-primary:hover {
+    background: #0369a1;
+    color: #ffffff !important;
+}
+
+.obwk-btn-outline {
+    background: transparent;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: auto;
+    padding: 6px 14px;
+}
+
+.obwk-btn-outline:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.obwk-btn-disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 782px) {
+    .obwk-header-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 20px;
+    }
+    .obwk-modules-grid {
+        grid-template-columns: 1fr;
+    }
+}
