@@ -75,6 +75,9 @@ class Plugin {
         // Register Variation Swatches Module
         $this->register_module(new Modules\Variation_Swatches\Variation_Swatches_Module());
 
+        // Register Color Swatch Filter Widget Module
+        $this->register_module(new Modules\Color_Filter\Color_Filter_Module());
+
         // Register WhatsApp Floating Contact Button Module
         $this->register_module(new Modules\WhatsApp\WhatsApp_Module());
 

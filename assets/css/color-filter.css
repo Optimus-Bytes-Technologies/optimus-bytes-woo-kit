@@ -1,0 +1,215 @@
+/* ==========================================================================
+   Optimus Bytes Woo Kit - Color Swatch Filter Widget Styles
+   ========================================================================== */
+
+.obwk-color-filter-widget {
+    margin: 0 0 24px 0;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+.obwk-filter-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+    color: inherit;
+    letter-spacing: 0.2px;
+}
+
+/* Clear Filter Button */
+.obwk-filter-clear-wrap {
+    margin-bottom: 12px;
+}
+
+.obwk-filter-clear-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #ef4444 !important;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+}
+
+.obwk-filter-clear-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    transform: translateY(-1px);
+}
+
+/* Base List */
+.obwk-color-filter-list {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* ==========================================
+   Grid Layout (Color Circles)
+   ========================================== */
+.obwk-filter-layout-grid .obwk-color-filter-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.obwk-filter-layout-grid .obwk-filter-item {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.obwk-filter-layout-grid .obwk-filter-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none !important;
+    position: relative;
+    outline: none;
+}
+
+.obwk-filter-layout-grid .obwk-filter-swatch-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    border: 2px solid transparent;
+}
+
+.obwk-filter-shape-square .obwk-filter-swatch-dot {
+    border-radius: 6px !important;
+}
+
+.obwk-filter-layout-grid .obwk-filter-link:hover .obwk-filter-swatch-dot {
+    transform: translateY(-2px) scale(1.05);
+}
+
+/* Active State (Grid) */
+.obwk-filter-layout-grid .obwk-filter-item.is-active .obwk-filter-swatch-dot {
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--theme-color, #c5a059);
+    transform: scale(1.08);
+}
+
+.obwk-filter-check {
+    font-size: 13px;
+    font-weight: 800;
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    position: absolute;
+}
+
+/* Border guide for light color swatches */
+.obwk-filter-border-guide {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+}
+
+/* Tooltips in Grid layout */
+.obwk-filter-layout-grid .obwk-filter-link[data-tooltip] {
+    position: relative;
+}
+
+.obwk-filter-layout-grid .obwk-filter-link[data-tooltip]::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    z-index: 100;
+}
+
+.obwk-filter-layout-grid .obwk-filter-link[data-tooltip]:hover::before {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* ==========================================
+   List Layout (Dot + Name + Count)
+   ========================================== */
+.obwk-filter-layout-list .obwk-color-filter-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.obwk-filter-layout-list .obwk-filter-item {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.obwk-filter-layout-list .obwk-filter-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    text-decoration: none !important;
+    color: inherit !important;
+    transition: all 0.15s ease;
+}
+
+.obwk-filter-layout-list .obwk-filter-link:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.obwk-filter-layout-list .obwk-filter-swatch-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    position: relative;
+}
+
+.obwk-filter-shape-square .obwk-filter-layout-list .obwk-filter-swatch-dot {
+    border-radius: 4px !important;
+}
+
+.obwk-filter-label {
+    flex: 1 1 auto;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.obwk-filter-count {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* Active State (List) */
+.obwk-filter-layout-list .obwk-filter-item.is-active .obwk-filter-link {
+    background: rgba(197, 160, 89, 0.15);
+    font-weight: 700;
+}
+
+.obwk-filter-layout-list .obwk-filter-item.is-active .obwk-filter-swatch-dot {
+    box-shadow: 0 0 0 2px var(--theme-color, #c5a059);
+}
