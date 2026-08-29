@@ -83,11 +83,18 @@ class Variation_Swatches_Module extends Abstract_Module {
         add_action('customize_register', array($this, 'register_customizer_settings'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
 
-        // Replace WooCommerce dropdown HTML with Swatches
+        // Replace WooCommerce dropdown HTML with Swatches on single product & quick view
         add_filter('woocommerce_dropdown_variation_attribute_options_html', array($this, 'render_swatches_html'), 10, 2);
 
-        // Product Loop Swatches on Shop / Category cards
-        add_action('woocommerce_after_shop_loop_item', array($this, 'render_loop_swatches'), 9);
+        $loop_pos = $this->get_option('loop_position', 'below_price');
+
+        if ('below_price' === $loop_pos) {
+            // Append directly to price HTML so it sits right under the price inside the product content card
+            add_filter('woocommerce_get_price_html', array($this, 'append_swatches_to_price_html'), 99, 2);
+        } elseif ('after_item' === $loop_pos) {
+            // After product card content (priority 30 to run after theme content)
+            add_action('woocommerce_after_shop_loop_item', array($this, 'render_loop_swatches_action'), 30);
+        }
     }
 
     /**
@@ -127,6 +134,23 @@ class Variation_Swatches_Module extends Abstract_Module {
             'description' => __('Displays preview color swatches on shop and category product cards with image switching.', 'optimus-bytes-woo-kit'),
             'section'     => $section_id,
             'type'        => 'checkbox',
+        ));
+
+        // Loop Swatches Placement Position
+        $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[variation_swatches_loop_position]', array(
+            'type'              => 'option',
+            'default'           => 'below_price',
+            'sanitize_callback' => 'sanitize_text_field',
+        ));
+        $wp_customize->add_control(OBWK_SETTINGS_OPTION . '[variation_swatches_loop_position]', array(
+            'label'       => __('Catalog Swatches Placement', 'optimus-bytes-woo-kit'),
+            'description' => __('Choose where color swatches appear on product cards.', 'optimus-bytes-woo-kit'),
+            'section'     => $section_id,
+            'type'        => 'select',
+            'choices'     => array(
+                'below_price' => __('Below Product Price (Recommended)', 'optimus-bytes-woo-kit'),
+                'after_item'  => __('After Product Card (Bottom)', 'optimus-bytes-woo-kit'),
+            ),
         ));
 
         // Swatch Shape
@@ -380,16 +404,14 @@ class Variation_Swatches_Module extends Abstract_Module {
     }
 
     /**
-     * Render Mini Color Swatches in the WooCommerce Product Loop (Shop & Category Cards)
+     * Generate HTML for Mini Color Swatches in the WooCommerce Product Loop
+     *
+     * @param \WC_Product $product
+     * @return string
      */
-    public function render_loop_swatches() {
-        if (!$this->is_enabled() || !(bool) $this->get_option('loop_enable', true)) {
-            return;
-        }
-
-        global $product;
+    public function get_loop_swatches_html($product) {
         if (!is_a($product, '\WC_Product') || !$product->is_type('variable')) {
-            return;
+            return '';
         }
 
         $attributes = $product->get_variation_attributes();
@@ -403,7 +425,7 @@ class Variation_Swatches_Module extends Abstract_Module {
         }
 
         if (empty($color_attr_key) || empty($attributes[$color_attr_key])) {
-            return;
+            return '';
         }
 
         $color_options = $attributes[$color_attr_key];
@@ -425,13 +447,13 @@ class Variation_Swatches_Module extends Abstract_Module {
         $main_image_id  = $product->get_image_id();
         $main_image_url = $main_image_id ? wp_get_attachment_image_url($main_image_id, 'woocommerce_thumbnail') : wc_placeholder_img_src('woocommerce_thumbnail');
 
-        echo '<div class="obwk-loop-swatches obwk-shape-' . esc_attr($shape) . '" data-product-id="' . esc_attr($product->get_id()) . '" data-default-image="' . esc_url($main_image_url) . '">';
+        $html = '<div class="obwk-loop-swatches obwk-shape-' . esc_attr($shape) . '" data-product-id="' . esc_attr($product->get_id()) . '" data-default-image="' . esc_url($main_image_url) . '">';
 
         foreach ($color_options as $option) {
             $count++;
             if ($count > $max_visible) {
                 $remaining = count($color_options) - $max_visible;
-                echo '<a href="' . esc_url(get_permalink($product->get_id())) . '" class="obwk-loop-more-badge" title="' . esc_attr__('View all colors', 'optimus-bytes-woo-kit') . '">+' . esc_html($remaining) . '</a>';
+                $html .= '<a href="' . esc_url(get_permalink($product->get_id())) . '" class="obwk-loop-more-badge" title="' . esc_attr__('View all colors', 'optimus-bytes-woo-kit') . '">+' . esc_html($remaining) . '</a>';
                 break;
             }
 
@@ -441,7 +463,7 @@ class Variation_Swatches_Module extends Abstract_Module {
             $color_hex = self::resolve_color_hex($term);
             $img_src   = isset($color_images[$term_slug]) ? $color_images[$term_slug] : $main_image_url;
 
-            echo sprintf(
+            $html .= sprintf(
                 '<span class="obwk-loop-swatch" style="background-color: %s;" data-image-src="%s" data-tooltip="%s" title="%s" role="button" tabindex="0"><span class="obwk-loop-swatch-inner"></span></span>',
                 esc_attr($color_hex),
                 esc_url($img_src),
@@ -450,6 +472,61 @@ class Variation_Swatches_Module extends Abstract_Module {
             );
         }
 
-        echo '</div>';
+        $html .= '</div>';
+        return $html;
+    }
+
+    /**
+     * Append loop swatches directly below the price HTML (Inside product content card)
+     *
+     * @param string $price_html
+     * @param \WC_Product $product
+     * @return string
+     */
+    public function append_swatches_to_price_html($price_html, $product) {
+        if (is_admin() && !wp_doing_ajax()) {
+            return $price_html;
+        }
+
+        if (!$this->is_enabled() || !(bool) $this->get_option('loop_enable', true)) {
+            return $price_html;
+        }
+
+        // Do not render inside single product summary on single product pages
+        if (function_exists('is_product') && is_product() && !wp_doing_ajax()) {
+            if (did_action('woocommerce_single_product_summary') && !did_action('woocommerce_after_single_product_summary')) {
+                return $price_html;
+            }
+        }
+
+        if (!is_a($product, '\WC_Product') || !$product->is_type('variable')) {
+            return $price_html;
+        }
+
+        $swatches_html = $this->get_loop_swatches_html($product);
+        if (!empty($swatches_html)) {
+            return $price_html . $swatches_html;
+        }
+
+        return $price_html;
+    }
+
+    /**
+     * Standard Action Hook renderer (After item content)
+     */
+    public function render_loop_swatches_action() {
+        if (!$this->is_enabled() || !(bool) $this->get_option('loop_enable', true)) {
+            return;
+        }
+
+        global $product;
+        if (!is_a($product, '\WC_Product') || !$product->is_type('variable')) {
+            return;
+        }
+
+        $swatches_html = $this->get_loop_swatches_html($product);
+        if (!empty($swatches_html)) {
+            echo $swatches_html;
+        }
     }
 }
