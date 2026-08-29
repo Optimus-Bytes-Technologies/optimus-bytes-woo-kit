@@ -34,6 +34,49 @@ class WhatsApp_Module extends Abstract_Module {
     }
 
     /**
+     * Check if floating button should be displayed on the current page
+     *
+     * @return bool
+     */
+    public function should_display() {
+        if (!$this->is_enabled()) {
+            return false;
+        }
+
+        // Hide on Checkout Page
+        if ((bool) $this->get_option('hide_checkout', false)) {
+            if (function_exists('is_checkout') && is_checkout()) {
+                return false;
+            }
+        }
+
+        // Hide on Cart Page
+        if ((bool) $this->get_option('hide_cart', false)) {
+            if (function_exists('is_cart') && is_cart()) {
+                return false;
+            }
+        }
+
+        // Hide on Single Product Pages
+        if ((bool) $this->get_option('hide_product', false)) {
+            if (function_exists('is_product') && is_product()) {
+                return false;
+            }
+        }
+
+        // Hide on Specific Page IDs (comma separated e.g. 12, 45, 108)
+        $hide_pages = $this->get_option('hide_pages', '');
+        if (!empty($hide_pages)) {
+            $page_ids = array_map('intval', array_filter(explode(',', $hide_pages)));
+            if (!empty($page_ids) && is_page($page_ids)) {
+                return false;
+            }
+        }
+
+        return apply_filters('obwk_whatsapp_should_display', true);
+    }
+
+    /**
      * Register WordPress Customizer settings under plugin option optimus_bytes_woo_kit_settings
      *
      * @param \WP_Customize_Manager $wp_customize
@@ -43,7 +86,7 @@ class WhatsApp_Module extends Abstract_Module {
 
         $wp_customize->add_section($section_id, array(
             'title'       => __('Floating WhatsApp Button', 'optimus-bytes-woo-kit'),
-            'description' => __('Configure the floating WhatsApp contact button for your store.', 'optimus-bytes-woo-kit'),
+            'description' => __('Configure the floating WhatsApp contact button and page visibility rules for your store.', 'optimus-bytes-woo-kit'),
             'priority'    => 120,
         ));
 
@@ -111,13 +154,68 @@ class WhatsApp_Module extends Abstract_Module {
             'section'  => $section_id,
             'type'     => 'textarea',
         ));
+
+        // ==========================================
+        // Page Visibility & Hide Options
+        // ==========================================
+
+        // Hide on Checkout Page
+        $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[whatsapp_hide_checkout]', array(
+            'type'              => 'option',
+            'default'           => false,
+            'sanitize_callback' => 'wp_validate_boolean',
+        ));
+        $wp_customize->add_control(OBWK_SETTINGS_OPTION . '[whatsapp_hide_checkout]', array(
+            'label'       => __('Hide on Checkout Page', 'optimus-bytes-woo-kit'),
+            'description' => __('Prevents distraction during the final payment checkout process.', 'optimus-bytes-woo-kit'),
+            'section'     => $section_id,
+            'type'        => 'checkbox',
+        ));
+
+        // Hide on Cart Page
+        $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[whatsapp_hide_cart]', array(
+            'type'              => 'option',
+            'default'           => false,
+            'sanitize_callback' => 'wp_validate_boolean',
+        ));
+        $wp_customize->add_control(OBWK_SETTINGS_OPTION . '[whatsapp_hide_cart]', array(
+            'label'       => __('Hide on Shopping Cart Page', 'optimus-bytes-woo-kit'),
+            'section'     => $section_id,
+            'type'        => 'checkbox',
+        ));
+
+        // Hide on Single Product Pages
+        $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[whatsapp_hide_product]', array(
+            'type'              => 'option',
+            'default'           => false,
+            'sanitize_callback' => 'wp_validate_boolean',
+        ));
+        $wp_customize->add_control(OBWK_SETTINGS_OPTION . '[whatsapp_hide_product]', array(
+            'label'       => __('Hide on Single Product Pages', 'optimus-bytes-woo-kit'),
+            'description' => __('Useful if "Order on WhatsApp" button is already active on product pages.', 'optimus-bytes-woo-kit'),
+            'section'     => $section_id,
+            'type'        => 'checkbox',
+        ));
+
+        // Hide on Specific Page IDs
+        $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[whatsapp_hide_pages]', array(
+            'type'              => 'option',
+            'default'           => '',
+            'sanitize_callback' => 'sanitize_text_field',
+        ));
+        $wp_customize->add_control(OBWK_SETTINGS_OPTION . '[whatsapp_hide_pages]', array(
+            'label'       => __('Hide on Specific Page IDs', 'optimus-bytes-woo-kit'),
+            'description' => __('Enter comma-separated page IDs (e.g. 15, 28, 104) where you want to hide the floating button.', 'optimus-bytes-woo-kit'),
+            'section'     => $section_id,
+            'type'        => 'text',
+        ));
     }
 
     /**
      * Enqueue styles
      */
     public function enqueue_scripts() {
-        if (!$this->is_enabled()) {
+        if (!$this->should_display()) {
             return;
         }
 
@@ -133,7 +231,7 @@ class WhatsApp_Module extends Abstract_Module {
      * Render the floating WhatsApp button in footer
      */
     public function render_floating_button() {
-        if (!$this->is_enabled()) {
+        if (!$this->should_display()) {
             return;
         }
 
