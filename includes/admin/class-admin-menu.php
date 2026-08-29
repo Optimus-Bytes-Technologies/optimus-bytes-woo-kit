@@ -136,13 +136,6 @@ class Admin_Menu {
         // Upcoming modules roadmap
         $upcoming_modules = array(
             array(
-                'title'       => __('Sticky Add to Cart Bar', 'optimus-bytes-woo-kit'),
-                'description' => __('Floating product purchase bar on single product pages when scrolling past the main buy button to boost conversion rates.', 'optimus-bytes-woo-kit'),
-                'icon'        => '🛒',
-                'badge'       => __('Available Soon', 'optimus-bytes-woo-kit'),
-                'category'    => __('Conversion', 'optimus-bytes-woo-kit'),
-            ),
-            array(
                 'title'       => __('Live Sales Notification Popups', 'optimus-bytes-woo-kit'),
                 'description' => __('Social proof popups displaying recent purchases in real-time to build customer trust and purchase urgency.', 'optimus-bytes-woo-kit'),
                 'icon'        => '🔥',
