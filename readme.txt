@@ -1,7 +1,7 @@
 === Optimus Bytes Woo Kit ===
 Contributors: optimusbytes
 Donate link: https://optimusbytes.com/
-Tags: woocommerce, product loop swatches, quick view swatches, color filter, swatch filter, layered nav, variation swatches, color swatches, announcement bar, marquee, sticky add to cart, buy now, whatsapp, order on whatsapp, ecommerce, sales booster
+Tags: woocommerce, variation swatches, sticky add to cart, announcement bar, whatsapp
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -9,18 +9,18 @@ Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-A modular, high-performance toolkit for WooCommerce stores featuring product loop swatches, quick view modal swatches, color swatch filters, top announcement marquee bars, sticky purchase bars, 1-click buy now checkout, and smart WhatsApp ordering tools by Optimus Bytes Technologies.
+All-in-one WooCommerce toolkit for variation swatches, announcement marquee bar, sticky buy now bar, color filter, and WhatsApp order buttons.
 
 == Description ==
 
-**Optimus Bytes Woo Kit** is a modular, lightweight, and high-conversion toolkit designed for WooCommerce stores. It empowers merchants with visual product swatches in catalog loops & quick view modals, shop sidebar color filters, promotional announcement bars, sticky purchase triggers, and direct WhatsApp customer ordering.
+Optimus Bytes Woo Kit is a modular, lightweight, and high-conversion toolkit designed for WooCommerce stores. It empowers merchants with visual product swatches, shop sidebar color filters, promotional announcement bars, sticky purchase triggers, and direct WhatsApp customer ordering.
 
 ### 🌟 Active Modules Included:
 
 #### 1. 🎨 Variation Swatches for WooCommerce (Product Pages, Loop Cards & Quick View)
 * **Product Catalog Loop Swatches**: Displays mini color swatches on shop and category product cards with instant hover/click image switching.
-* **Theme Quick View Modal Support**: Automatically initializes and renders visual swatches inside theme quick view popups (`th_quick_view`, `thnew_quick_view`, etc.).
-* **Visual Color & Button Swatches**: Transforms ugly default `<select>` dropdowns into interactive color circles, image thumbnails, and clean button/pill badges.
+* **Theme Quick View Modal Support**: Automatically initializes and renders visual swatches inside theme quick view popups.
+* **Visual Color & Button Swatches**: Transforms plain variation dropdowns into interactive color circles, image thumbnails, and clean button/pill badges.
 * **Smart Color Resolver**: Automatically recognizes dozens of color names and Indian saree hues (Royal Blue, Rani Pink, Maroon, Peacock Green, Zari Gold, Mustard, Bottle Green, etc.) and renders accurate colors without manual setup.
 * **Real-time Out-of-Stock Detection**: Automatically disables and strikes through unavailable variation combinations with clean diagonal lines.
 * **Hover Tooltips**: Floating labels displaying term names when hovering over swatches.
@@ -60,6 +60,11 @@ A modular, high-performance toolkit for WooCommerce stores featuring product loo
 * **No Database Bloat**: All plugin options are stored neatly in `wp_options` under `optimus_bytes_woo_kit_settings`.
 * **Zero Legacy Code**: Fully decoupled from active themes — your settings stay intact even if you switch themes.
 
+### 🚀 Developer Friendly & High Performance
+* **100% HPOS Compatible**: Fully declared and tested with WooCommerce High-Performance Order Storage (`custom_order_tables`) and WooCommerce Blocks.
+* **Modular Architecture**: Easily extendable with new modules extending `Abstract_Module`.
+* **Asset Scoping**: CSS and JS are only enqueued on pages where the respective module is enabled.
+
 == Installation ==
 
 ### Automatic Installation (WordPress Dashboard)
@@ -71,7 +76,18 @@ A modular, high-performance toolkit for WooCommerce stores featuring product loo
 ### Configuration
 1. Click on **Optimus Woo Kit** in your WordPress Admin sidebar.
 2. Use the toggle switches to enable or disable features.
-3. Click **Configure Settings** or go to **Appearance > Customize** to adjust settings live.
+3. Click **Configure Settings** or go to **Appearance > Customize** or **Appearance > Widgets** to adjust settings live.
+
+== Frequently Asked Questions ==
+
+= Does this plugin support WooCommerce High-Performance Order Storage (HPOS)? =
+Yes! Optimus Bytes Woo Kit is 100% compatible with HPOS (Custom Order Tables) and WooCommerce Cart & Checkout Blocks.
+
+= Can I use this plugin with any WordPress theme? =
+Yes! The plugin uses standard WordPress and WooCommerce core APIs and works with Astra, Storefront, Flatsome, Kadence, GeneratePress, OceanWP, TH Shop Mania, and custom themes.
+
+= Where are the plugin settings stored? =
+All module options are stored cleanly in `wp_options` under a single option key: `optimus_bytes_woo_kit_settings`.
 
 == Changelog ==
 
