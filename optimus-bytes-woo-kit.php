@@ -73,7 +73,7 @@ spl_autoload_register(function ($class) {
     // Convert class name to WordPress naming convention: class-something.php
     $formatted_class_name = 'class-' . strtolower(str_replace('_', '-', $class_name)) . '.php';
 
-    // Subdirectories converting underscores to hyphens (e.g. Product_WhatsApp -> product-whatsapp)
+    // Subdirectories converting underscores to hyphens (e.g. Sticky_Add_To_Cart -> sticky-add-to-cart)
     $sub_dir = '';
     if (!empty($parts)) {
         $dir_parts = array_map(function ($p) {

@@ -75,6 +75,9 @@ class Plugin {
         // Register Single Product Order on WhatsApp Module
         $this->register_module(new Modules\Product_WhatsApp\Product_WhatsApp_Module());
 
+        // Register Sticky Add to Cart & Buy Now Bar Module
+        $this->register_module(new Modules\Sticky_Add_To_Cart\Sticky_Add_To_Cart_Module());
+
         /**
          * Action to register additional custom modules
          *
