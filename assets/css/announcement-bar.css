@@ -1,0 +1,183 @@
+/* ==========================================================================
+   Optimus Bytes Woo Kit - Scrolling Announcement Bar
+   ========================================================================== */
+
+.obwk-announcement-bar {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    z-index: 999;
+    padding: 7px 0;
+    font-size: 13px;
+    letter-spacing: 0.4px;
+    user-select: none;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.obwk-announcement-track {
+    display: flex;
+    width: max-content;
+    overflow: hidden;
+}
+
+.obwk-announcement-group {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    white-space: nowrap;
+    animation: obwk-marquee-scroll 32s linear infinite;
+    will-change: transform;
+}
+
+/* Speed Variants */
+.obwk-speed-normal .obwk-announcement-group {
+    animation-duration: 32s;
+}
+
+.obwk-speed-slow .obwk-announcement-group {
+    animation-duration: 45s;
+}
+
+.obwk-speed-fast .obwk-announcement-group {
+    animation-duration: 20s;
+}
+
+/* Pause on Hover */
+.obwk-announcement-bar.is-pause-on-hover:hover .obwk-announcement-group {
+    animation-play-state: paused;
+}
+
+/* Items */
+.obwk-announcement-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 18px;
+    font-weight: 500;
+}
+
+.obwk-announcement-icon {
+    margin-right: 8px;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.obwk-announcement-link {
+    color: inherit;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+
+.obwk-announcement-link:hover {
+    text-decoration: underline;
+    opacity: 0.85;
+}
+
+.obwk-announcement-separator {
+    margin-left: 28px;
+    opacity: 0.75;
+    font-size: 11px;
+}
+
+/* Marquee Keyframes */
+@keyframes obwk-marquee-scroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+/* ==========================================================================
+   Theme Styles
+   ========================================================================== */
+
+/* Theme: Inherit Active Theme Style */
+.obwk-style-inherit_theme {
+    background-color: var(--theme-bg-dark, var(--theme-bg, #2b0f08));
+    border-bottom: 1px solid var(--theme-color, #a46d35);
+    color: var(--body-text, var(--white, #ffffff));
+}
+
+.obwk-style-inherit_theme .obwk-announcement-link,
+.obwk-style-inherit_theme .obwk-announcement-separator {
+    color: var(--theme-color-light, #e5ba59);
+}
+
+/* Theme: Luxury Saree Gold & Dark */
+.obwk-style-luxury_saree_gold {
+    background-color: #121824;
+    border-bottom: 1px solid rgba(197, 160, 89, 0.4);
+    color: #ffffff;
+}
+
+.obwk-style-luxury_saree_gold .obwk-announcement-link,
+.obwk-style-luxury_saree_gold .obwk-announcement-separator {
+    color: #c5a059;
+}
+
+/* Theme: Festive Crimson Red & Gold */
+.obwk-style-festive_crimson {
+    background-color: #881337;
+    border-bottom: 1px solid #fbbf24;
+    color: #ffffff;
+}
+
+.obwk-style-festive_crimson .obwk-announcement-link,
+.obwk-style-festive_crimson .obwk-announcement-separator {
+    color: #fef08a;
+}
+
+/* Theme: Modern Dark Slate */
+.obwk-style-modern_dark {
+    background-color: #0f172a;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+}
+
+.obwk-style-modern_dark .obwk-announcement-link,
+.obwk-style-modern_dark .obwk-announcement-separator {
+    color: #60a5fa;
+}
+
+/* Theme: Clean White Minimal */
+.obwk-style-clean_white {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    color: #0f172a;
+}
+
+.obwk-style-clean_white .obwk-announcement-link,
+.obwk-style-clean_white .obwk-announcement-separator {
+    color: #0284c7;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+    .obwk-announcement-bar {
+        padding: 6px 0;
+        font-size: 12px;
+    }
+    .obwk-speed-normal .obwk-announcement-group {
+        animation-duration: 24s;
+    }
+    .obwk-announcement-item {
+        padding: 0 12px;
+    }
+    .obwk-announcement-separator {
+        margin-left: 18px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .obwk-announcement-group {
+        animation: none;
+    }
+    .obwk-announcement-track {
+        overflow-x: auto;
+        width: 100%;
+        justify-content: center;
+    }
+}

@@ -69,6 +69,9 @@ class Plugin {
      * Initialize pluggable modules
      */
     private function init_modules() {
+        // Register Announcement Bar Module
+        $this->register_module(new Modules\Announcement_Bar\Announcement_Bar_Module());
+
         // Register WhatsApp Floating Contact Button Module
         $this->register_module(new Modules\WhatsApp\WhatsApp_Module());
 
