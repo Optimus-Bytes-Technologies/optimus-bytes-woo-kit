@@ -140,10 +140,28 @@ class Color_Filter_Module extends Abstract_Module {
             'section'  => $section_id,
             'type'     => 'checkbox',
         ));
+
+        // Max Visible Items Before Show More
+        $wp_customize->add_setting(OBWK_SETTINGS_OPTION . '[color_filter_max_items]', array(
+            'type'              => 'option',
+            'default'           => 2,
+            'sanitize_callback' => 'absint',
+        ));
+        $wp_customize->add_control(OBWK_SETTINGS_OPTION . '[color_filter_max_items]', array(
+            'label'       => __('Initial Visible Colors Limit', 'optimus-bytes-woo-kit'),
+            'description' => __('Number of colors shown before adding "+ Show more" toggle (Default: 10).', 'optimus-bytes-woo-kit'),
+            'section'     => $section_id,
+            'type'        => 'number',
+            'input_attrs' => array(
+                'min'  => 1,
+                'max'  => 100,
+                'step' => 1,
+            ),
+        ));
     }
 
     /**
-     * Enqueue CSS
+     * Enqueue CSS & JavaScript
      */
     public function enqueue_scripts() {
         if (!function_exists('is_shop') && !function_exists('is_product_taxonomy')) {
@@ -156,6 +174,14 @@ class Color_Filter_Module extends Abstract_Module {
                 OBWK_PLUGIN_URL . 'assets/css/color-filter.css',
                 array(),
                 OBWK_VERSION
+            );
+
+            wp_enqueue_script(
+                'obwk-color-filter-script',
+                OBWK_PLUGIN_URL . 'assets/js/color-filter.js',
+                array('jquery'),
+                OBWK_VERSION,
+                true
             );
         }
     }
@@ -438,6 +464,7 @@ class Color_Filter_Module extends Abstract_Module {
             'show_count' => (bool) $this->get_option('show_count', true),
             'hide_empty' => (bool) $this->get_option('hide_empty', true),
             'show_clear' => (bool) $this->get_option('show_clear', true),
+            'max_items'  => (int) $this->get_option('max_items', 10),
         ), $atts, 'obwk_color_filter');
 
         ob_start();
@@ -475,6 +502,10 @@ class Color_Filter_Module extends Abstract_Module {
         $hide_empty = isset($args['hide_empty']) ? (bool) $args['hide_empty'] : true;
         $show_clear = isset($args['show_clear']) ? (bool) $args['show_clear'] : true;
         $title      = !empty($args['title']) ? $args['title'] : '';
+        $max_items  = isset($args['max_items']) ? intval($args['max_items']) : 10;
+        if ($max_items <= 0) {
+            $max_items = 10;
+        }
 
         // Calculate contextual counts for current category and all active query filters
         $counts = self::get_contextual_term_counts($terms, $attribute_name, 'or');
@@ -501,8 +532,58 @@ class Color_Filter_Module extends Abstract_Module {
         $current_all_params = !empty($_GET) && is_array($_GET) ? wp_unslash($_GET) : array();
         unset($current_all_params['paged']);
 
+        // Collect all eligible visible items
+        $visible_items = array();
+        foreach ($terms as $term) {
+            $term_id    = $term->term_id;
+            $term_slug  = $term->slug;
+            $term_count = isset($counts[$term_id]) ? (int) $counts[$term_id] : 0;
+            $is_active  = in_array($term_slug, $current_color_filter, true);
+
+            // Skip empty colors in current filter context if hide_empty is enabled and not active
+            if ($hide_empty && $term_count === 0 && !$is_active) {
+                continue;
+            }
+
+            $visible_items[] = array(
+                'term'       => $term,
+                'term_id'    => $term_id,
+                'term_slug'  => $term_slug,
+                'term_name'  => $term->name,
+                'term_count' => $term_count,
+                'is_active'  => $is_active,
+            );
+        }
+
+        if (empty($visible_items)) {
+            return;
+        }
+
+        $total_visible   = count($visible_items);
+        $show_toggle     = ($total_visible > $max_items);
+        $remaining_count = $show_toggle ? ($total_visible - $max_items) : 0;
+
+        // Auto-expand if user has an active filter on an item beyond the initial limit
+        $has_active_beyond = false;
+        if ($show_toggle) {
+            for ($i = $max_items; $i < $total_visible; $i++) {
+                if ($visible_items[$i]['is_active']) {
+                    $has_active_beyond = true;
+                    break;
+                }
+            }
+        }
+
+        $widget_classes = array(
+            'obwk-color-filter-widget',
+            'obwk-filter-layout-' . sanitize_html_class($layout),
+            'obwk-filter-shape-' . sanitize_html_class($shape),
+        );
+        if ($has_active_beyond) {
+            $widget_classes[] = 'is-expanded';
+        }
         ?>
-        <div class="obwk-color-filter-widget obwk-filter-layout-<?php echo esc_attr($layout); ?> obwk-filter-shape-<?php echo esc_attr($shape); ?>">
+        <div class="<?php echo esc_attr(implode(' ', $widget_classes)); ?>">
             <?php if (!empty($title)) : ?>
                 <h3 class="obwk-filter-title"><?php echo esc_html($title); ?></h3>
             <?php endif; ?>
@@ -522,19 +603,18 @@ class Color_Filter_Module extends Abstract_Module {
             <?php endif; ?>
 
             <ul class="obwk-color-filter-list">
-                <?php foreach ($terms as $term) : 
-                    $term_id     = $term->term_id;
-                    $term_slug   = $term->slug;
-                    $term_name   = $term->name;
-                    $term_count  = isset($counts[$term_id]) ? (int) $counts[$term_id] : 0;
-                    $is_active   = in_array($term_slug, $current_color_filter, true);
+                <?php 
+                $item_index = 0;
+                foreach ($visible_items as $item) : 
+                    $item_index++;
+                    $is_more_item = ($item_index > $max_items);
+                    $term         = $item['term'];
+                    $term_slug    = $item['term_slug'];
+                    $term_name    = $item['term_name'];
+                    $term_count   = $item['term_count'];
+                    $is_active    = $item['is_active'];
 
-                    // Skip empty colors in current filter context if hide_empty is enabled and not active
-                    if ($hide_empty && $term_count === 0 && !$is_active) {
-                        continue;
-                    }
-
-                    $color_hex   = class_exists('OptimusBytes\WooKit\Modules\Variation_Swatches\Variation_Swatches_Module') 
+                    $color_hex    = class_exists('OptimusBytes\WooKit\Modules\Variation_Swatches\Variation_Swatches_Module') 
                         ? Variation_Swatches_Module::resolve_color_hex($term) 
                         : '#a46d35';
 
@@ -556,8 +636,19 @@ class Color_Filter_Module extends Abstract_Module {
                     }
 
                     $link_url = !empty($link_params) ? add_query_arg($link_params, $base_url) : $base_url;
+
+                    $li_classes = array('obwk-filter-item');
+                    if ($is_active) {
+                        $li_classes[] = 'is-active';
+                    }
+                    if ($term_count === 0) {
+                        $li_classes[] = 'is-count-zero';
+                    }
+                    if ($is_more_item) {
+                        $li_classes[] = 'obwk-filter-item-more';
+                    }
                 ?>
-                    <li class="obwk-filter-item <?php echo $is_active ? 'is-active' : ''; ?> <?php echo ($term_count === 0) ? 'is-count-zero' : ''; ?>">
+                    <li class="<?php echo esc_attr(implode(' ', $li_classes)); ?>">
                         <a href="<?php echo esc_url($link_url); ?>" 
                            class="obwk-filter-link" 
                            title="<?php echo esc_attr($term_name . ' (' . $term_count . ')'); ?>" 
@@ -583,6 +674,22 @@ class Color_Filter_Module extends Abstract_Module {
                     </li>
                 <?php endforeach; ?>
             </ul>
+
+            <?php if ($show_toggle) : 
+                $text_more = sprintf(__('+ %d more colors', 'optimus-bytes-woo-kit'), $remaining_count);
+                $text_less = __('- Show less', 'optimus-bytes-woo-kit');
+            ?>
+                <div class="obwk-filter-more-wrap">
+                    <button type="button" 
+                            class="obwk-filter-more-btn" 
+                            data-expanded="<?php echo $has_active_beyond ? 'true' : 'false'; ?>" 
+                            data-text-more="<?php echo esc_attr($text_more); ?>" 
+                            data-text-less="<?php echo esc_attr($text_less); ?>"
+                            aria-label="<?php echo esc_attr($has_active_beyond ? $text_less : $text_more); ?>">
+                        <span class="obwk-filter-more-text"><?php echo esc_html($has_active_beyond ? $text_less : $text_more); ?></span>
+                    </button>
+                </div>
+            <?php endif; ?>
         </div>
         <?php
     }
@@ -618,6 +725,7 @@ if (class_exists('\WP_Widget')) {
             $show_count = isset($instance['show_count']) ? (bool) $instance['show_count'] : true;
             $hide_empty = isset($instance['hide_empty']) ? (bool) $instance['hide_empty'] : true;
             $show_clear = isset($instance['show_clear']) ? (bool) $instance['show_clear'] : true;
+            $max_items  = !empty($instance['max_items']) ? intval($instance['max_items']) : 10;
 
             Color_Filter_Module::render_filter_html(array(
                 'title'      => $title,
@@ -627,6 +735,7 @@ if (class_exists('\WP_Widget')) {
                 'show_count' => $show_count,
                 'hide_empty' => $hide_empty,
                 'show_clear' => $show_clear,
+                'max_items'  => $max_items,
             ));
 
             echo $args['after_widget'];
@@ -640,6 +749,7 @@ if (class_exists('\WP_Widget')) {
             $show_count = isset($instance['show_count']) ? (bool) $instance['show_count'] : true;
             $hide_empty = isset($instance['hide_empty']) ? (bool) $instance['hide_empty'] : true;
             $show_clear = isset($instance['show_clear']) ? (bool) $instance['show_clear'] : true;
+            $max_items  = !empty($instance['max_items']) ? intval($instance['max_items']) : 10;
             ?>
             <p>
                 <label for="<?php echo esc_attr($this->get_field_id('title')); ?>"><?php esc_html_e('Title:', 'optimus-bytes-woo-kit'); ?></label>
@@ -665,6 +775,10 @@ if (class_exists('\WP_Widget')) {
                 </select>
             </p>
             <p>
+                <label for="<?php echo esc_attr($this->get_field_id('max_items')); ?>"><?php esc_html_e('Initial Visible Limit (Before Show More):', 'optimus-bytes-woo-kit'); ?></label>
+                <input class="widefat" id="<?php echo esc_attr($this->get_field_id('max_items')); ?>" name="<?php echo esc_attr($this->get_field_name('max_items')); ?>" type="number" min="1" max="100" value="<?php echo esc_attr($max_items); ?>" />
+            </p>
+            <p>
                 <input class="checkbox" type="checkbox" <?php checked($show_count); ?> id="<?php echo esc_attr($this->get_field_id('show_count')); ?>" name="<?php echo esc_attr($this->get_field_name('show_count')); ?>" />
                 <label for="<?php echo esc_attr($this->get_field_id('show_count')); ?>"><?php esc_html_e('Show product counts', 'optimus-bytes-woo-kit'); ?></label>
             </p>
@@ -688,6 +802,7 @@ if (class_exists('\WP_Widget')) {
             $instance['show_count'] = isset($new_instance['show_count']) ? (bool) $new_instance['show_count'] : false;
             $instance['hide_empty'] = isset($new_instance['hide_empty']) ? (bool) $new_instance['hide_empty'] : false;
             $instance['show_clear'] = isset($new_instance['show_clear']) ? (bool) $new_instance['show_clear'] : false;
+            $instance['max_items']  = !empty($new_instance['max_items']) ? absint($new_instance['max_items']) : 10;
             return $instance;
         }
     }
