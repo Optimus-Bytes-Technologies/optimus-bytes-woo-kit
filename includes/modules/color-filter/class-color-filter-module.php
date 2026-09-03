@@ -564,7 +564,7 @@ class Color_Filter_Module extends Abstract_Module {
                            aria-label="<?php echo esc_attr($term_name . ' (' . $term_count . ')'); ?>"
                            data-tooltip="<?php echo esc_attr($term_name . ' (' . $term_count . ')'); ?>">
                             
-                            <span class="obwk-filter-swatch-dot" style="background-color: <?php echo esc_attr($color_hex); ?>;">
+                            <span class="obwk-filter-swatch-dot" style="background: <?php echo esc_attr($color_hex); ?>;">
                                 <?php if ($color_hex === '#ffffff' || $color_hex === '#fafaf9') : ?>
                                     <span class="obwk-filter-border-guide"></span>
                                 <?php endif; ?>

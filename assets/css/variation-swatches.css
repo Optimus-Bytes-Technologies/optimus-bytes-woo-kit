@@ -87,11 +87,11 @@
 }
 
 /* Light color swatch checkmark override */
-.obwk-swatch-color[style*="background-color: #ffffff"].is-selected::after,
-.obwk-swatch-color[style*="background-color: #fafaf9"].is-selected::after,
-.obwk-swatch-color[style*="background-color: #fef3c7"].is-selected::after,
-.obwk-swatch-color[style*="background-color: #f5f5dc"].is-selected::after,
-.obwk-swatch-color[style*="background-color: #fbcfe8"].is-selected::after {
+.obwk-swatch-color[style*="#ffffff"].is-selected::after,
+.obwk-swatch-color[style*="#fafaf9"].is-selected::after,
+.obwk-swatch-color[style*="#fef3c7"].is-selected::after,
+.obwk-swatch-color[style*="#f5f5dc"].is-selected::after,
+.obwk-swatch-color[style*="#fbcfe8"].is-selected::after {
     color: #0f172a;
     text-shadow: none;
 }

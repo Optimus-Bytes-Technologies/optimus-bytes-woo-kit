@@ -28,6 +28,7 @@ class Variation_Swatches_Module extends Abstract_Module {
         'magenta'        => '#c026d3',
         'purple'         => '#9333ea',
         'violet'         => '#7c3aed',
+        'lavender'       => '#c084fc',
         'indigo'         => '#4f46e5',
         'blue'           => '#2563eb',
         'royal-blue'     => '#1d4ed8',
@@ -36,6 +37,7 @@ class Variation_Swatches_Module extends Abstract_Module {
         'sky-blue'       => '#0ea5e9',
         'cyan'           => '#06b6d4',
         'teal'           => '#0d9488',
+        'turquoise'      => '#14b8a6',
         'peacock-green'  => '#047857',
         'peacock-blue'   => '#0284c7',
         'green'          => '#16a34a',
@@ -63,6 +65,19 @@ class Variation_Swatches_Module extends Abstract_Module {
         'gray'           => '#64748b',
         'charcoal'       => '#334155',
         'black'          => '#0f172a',
+        'teal-blue'      => '#1A2537',
+
+        // Dual Color Combinations
+        'turquoise-pink' => 'linear-gradient(135deg, #14b8a6 50%, #ec4899 50%)',
+        'pink-turquoise' => 'linear-gradient(135deg, #ec4899 50%, #14b8a6 50%)',
+        'lavender-pink'  => 'linear-gradient(135deg, #c084fc 50%, #ec4899 50%)',
+        'pink-lavender'  => 'linear-gradient(135deg, #ec4899 50%, #c084fc 50%)',
+        'green-purple'   => 'linear-gradient(135deg, #16a34a 50%, #9333ea 50%)',
+        'purple-green'   => 'linear-gradient(135deg, #9333ea 50%, #16a34a 50%)',
+        'rust-blue'      => 'linear-gradient(135deg, #c2410c 50%, #2563eb 50%)',
+        'blue-rust'      => 'linear-gradient(135deg, #2563eb 50%, #c2410c 50%)',
+        'black-pink'     => 'linear-gradient(135deg, #0f172a 50%, #ec4899 50%)',
+        'pink-black'     => 'linear-gradient(135deg, #ec4899 50%, #0f172a 50%)',
     );
 
     /**
@@ -290,9 +305,24 @@ class Variation_Swatches_Module extends Abstract_Module {
             return self::$color_map[$name_key];
         }
 
-        // 4. Check if term name itself is a valid hex code
-        if (preg_match('/^#([a-f0-9]{3}){1,2}$/i', $name)) {
+        // 4. Check if term name itself is a valid hex code or gradient
+        if (preg_match('/^#([a-f0-9]{3}){1,2}$/i', $name) || strpos($name, 'gradient') !== false) {
             return $name;
+        }
+
+        // 5. Automatic dynamic multi-color split resolution (e.g., "Turquoise Pink", "Turquoise / Pink", "Rust & Blue")
+        $parts = preg_split('/[\s\/\-_]+|\s+and\s+|\s+with\s+|\s*&\s*/i', trim($name));
+        if (is_array($parts) && count($parts) >= 2) {
+            $c1 = sanitize_title($parts[0]);
+            $c2 = sanitize_title($parts[1]);
+            $hex1 = isset(self::$color_map[$c1]) ? self::$color_map[$c1] : null;
+            $hex2 = isset(self::$color_map[$c2]) ? self::$color_map[$c2] : null;
+            if ($hex1 && $hex2) {
+                // If either value is already a gradient, extract first hex or fallback
+                $val1 = (strpos($hex1, '#') !== false && preg_match('/#([a-f0-9]{3,8})/i', $hex1, $m1)) ? $m1[0] : '#0f172a';
+                $val2 = (strpos($hex2, '#') !== false && preg_match('/#([a-f0-9]{3,8})/i', $hex2, $m2)) ? $m2[0] : '#ec4899';
+                return "linear-gradient(135deg, {$val1} 50%, {$val2} 50%)";
+            }
         }
 
         // Default fallback (sleek neutral gold/slate)
@@ -349,7 +379,7 @@ class Variation_Swatches_Module extends Abstract_Module {
                 if ('color' === $swatch_type) {
                     $color_hex = self::resolve_color_hex($term);
                     $swatches_html .= sprintf(
-                        '<span class="obwk-swatch obwk-swatch-color %s" data-value="%s" style="background-color: %s;" role="button" tabindex="0" aria-label="%s"%s><span class="obwk-swatch-inner"></span>%s</span>',
+                        '<span class="obwk-swatch obwk-swatch-color %s" data-value="%s" style="background: %s;" role="button" tabindex="0" aria-label="%s"%s><span class="obwk-swatch-inner"></span>%s</span>',
                         $is_selected ? 'is-selected' : '',
                         esc_attr($term_slug),
                         esc_attr($color_hex),
@@ -377,7 +407,7 @@ class Variation_Swatches_Module extends Abstract_Module {
                 if ('color' === $swatch_type) {
                     $color_hex = self::resolve_color_hex($option);
                     $swatches_html .= sprintf(
-                        '<span class="obwk-swatch obwk-swatch-color %s" data-value="%s" style="background-color: %s;" role="button" tabindex="0" aria-label="%s"%s><span class="obwk-swatch-inner"></span></span>',
+                        '<span class="obwk-swatch obwk-swatch-color %s" data-value="%s" style="background: %s;" role="button" tabindex="0" aria-label="%s"%s><span class="obwk-swatch-inner"></span></span>',
                         $is_selected ? 'is-selected' : '',
                         esc_attr($option),
                         esc_attr($color_hex),
@@ -464,7 +494,7 @@ class Variation_Swatches_Module extends Abstract_Module {
             $img_src   = isset($color_images[$term_slug]) ? $color_images[$term_slug] : $main_image_url;
 
             $html .= sprintf(
-                '<span class="obwk-loop-swatch" style="background-color: %s;" data-image-src="%s" data-tooltip="%s" title="%s" role="button" tabindex="0"><span class="obwk-loop-swatch-inner"></span></span>',
+                '<span class="obwk-loop-swatch" style="background: %s;" data-image-src="%s" data-tooltip="%s" title="%s" role="button" tabindex="0"><span class="obwk-loop-swatch-inner"></span></span>',
                 esc_attr($color_hex),
                 esc_url($img_src),
                 esc_attr($term_name),
