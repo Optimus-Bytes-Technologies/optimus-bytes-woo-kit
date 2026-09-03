@@ -90,6 +90,9 @@ class Plugin {
         // Register Category Showcase Module (Elementor Slider & Grid)
         $this->register_module(new Modules\Category_Showcase\Category_Showcase_Module());
 
+        // Register Product Tabs Module (Elementor Tabbed Product Carousel)
+        $this->register_module(new Modules\Product_Tabs\Product_Tabs_Module());
+
         /**
          * Action to register additional custom modules
          *

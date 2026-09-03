@@ -63,13 +63,27 @@
             config.grabCursor = true;
             config.watchOverflow = true;
 
-            // Wait for Swiper class to be available
+            // Initialize Swiper instance safely
+            var SwiperClass = null;
             if (typeof Swiper !== 'undefined') {
-                new Swiper($swiperEl[0], config);
+                SwiperClass = Swiper;
             } else if (window.elementorFrontend && window.elementorFrontend.utils && window.elementorFrontend.utils.swiper) {
-                new window.elementorFrontend.utils.swiper($swiperEl[0], config).then(function (swiperInstance) {
-                    $swiperEl[0].swiper = swiperInstance;
-                });
+                SwiperClass = window.elementorFrontend.utils.swiper;
+            }
+
+            if (SwiperClass) {
+                try {
+                    var instance = new SwiperClass($swiperEl[0], config);
+                    if (instance && typeof instance.then === 'function') {
+                        instance.then(function (swiperInst) {
+                            $swiperEl[0].swiper = swiperInst;
+                        });
+                    } else {
+                        $swiperEl[0].swiper = instance;
+                    }
+                } catch (err) {
+                    console.warn('OBWK Category Swiper Init Notice:', err);
+                }
             }
         });
     }
@@ -80,7 +94,7 @@
     });
 
     // Elementor Frontend & Live Editor Hook
-    $(window).on('elementor/frontend/init', function () {
+    function registerElementorCategoryHook() {
         if (typeof elementorFrontend !== 'undefined' && elementorFrontend.hooks) {
             elementorFrontend.hooks.addAction(
                 'frontend/element_ready/obwk_category_slider_grid.default',
@@ -89,6 +103,11 @@
                 }
             );
         }
-    });
+    }
+
+    $(window).on('elementor/frontend/init', registerElementorCategoryHook);
+    if (typeof elementorFrontend !== 'undefined' && elementorFrontend.hooks) {
+        registerElementorCategoryHook();
+    }
 
 })(jQuery);

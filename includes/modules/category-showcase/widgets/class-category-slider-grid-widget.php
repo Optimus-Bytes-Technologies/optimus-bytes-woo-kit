@@ -16,6 +16,10 @@ use Elementor\Group_Control_Background;
 
 defined('ABSPATH') || exit;
 
+if (!class_exists('\Elementor\Widget_Base')) {
+    return;
+}
+
 class Category_Slider_Grid_Widget extends Widget_Base {
 
     /**
@@ -523,13 +527,82 @@ class Category_Slider_Grid_Widget extends Widget_Base {
             )
         );
 
+        $this->add_control(
+            'card_bg_color',
+            array(
+                'label'     => __('Card Background Color', 'optimus-bytes-woo-kit'),
+                'type'      => Controls_Manager::COLOR,
+                'selectors' => array(
+                    '{{WRAPPER}} .obwk-category-card' => 'background-color: {{VALUE}} !important;',
+                ),
+            )
+        );
+
+        $this->add_control(
+            'card_hover_bg_color',
+            array(
+                'label'     => __('Card Hover Background Color', 'optimus-bytes-woo-kit'),
+                'type'      => Controls_Manager::COLOR,
+                'selectors' => array(
+                    '{{WRAPPER}} .obwk-category-card:hover' => 'background-color: {{VALUE}} !important;',
+                ),
+            )
+        );
+
         $this->add_group_control(
             Group_Control_Background::get_type(),
             array(
                 'name'     => 'card_background',
-                'label'    => __('Card Background', 'optimus-bytes-woo-kit'),
+                'label'    => __('Card Background (Gradient/Image)', 'optimus-bytes-woo-kit'),
                 'types'    => array('classic', 'gradient'),
                 'selector' => '{{WRAPPER}} .obwk-category-card',
+            )
+        );
+
+        $this->add_control(
+            'overlay_color',
+            array(
+                'label'     => __('Image Overlay Color / Gradient', 'optimus-bytes-woo-kit'),
+                'type'      => Controls_Manager::COLOR,
+                'selectors' => array(
+                    '{{WRAPPER}} .obwk-category-overlay' => 'background: {{VALUE}} !important;',
+                ),
+                'condition' => array(
+                    'skin' => 'overlay',
+                ),
+            )
+        );
+
+        $this->add_control(
+            'info_bg_color',
+            array(
+                'label'     => __('Content Box Background Color', 'optimus-bytes-woo-kit'),
+                'type'      => Controls_Manager::COLOR,
+                'selectors' => array(
+                    '{{WRAPPER}} .obwk-category-info' => 'background-color: {{VALUE}};',
+                ),
+                'condition' => array(
+                    'skin' => 'classic',
+                ),
+            )
+        );
+
+        $this->add_group_control(
+            Group_Control_Border::get_type(),
+            array(
+                'name'     => 'card_border',
+                'selector' => '{{WRAPPER}} .obwk-category-card',
+            )
+        );
+
+        $this->add_control(
+            'card_hover_border_color',
+            array(
+                'label'     => __('Card Hover Border Color', 'optimus-bytes-woo-kit'),
+                'type'      => Controls_Manager::COLOR,
+                'selectors' => array(
+                    '{{WRAPPER}} .obwk-category-card:hover' => 'border-color: {{VALUE}} !important;',
+                ),
             )
         );
 
@@ -790,7 +863,7 @@ class Category_Slider_Grid_Widget extends Widget_Base {
         $terms = self::query_categories($settings);
 
         if (empty($terms)) {
-            if (\Elementor\Plugin::$instance->editor->is_edit_mode()) {
+            if (class_exists('\Elementor\Plugin') && \Elementor\Plugin::$instance && isset(\Elementor\Plugin::$instance->editor) && \Elementor\Plugin::$instance->editor->is_edit_mode()) {
                 return '<div class="obwk-category-empty-notice">' . esc_html__('No WooCommerce product categories found for current query settings.', 'optimus-bytes-woo-kit') . '</div>';
             }
             return '';

@@ -528,6 +528,16 @@ class Variation_Swatches_Module extends Abstract_Module {
     }
 
     /**
+     * Alias for get_loop_swatches_html
+     *
+     * @param \WC_Product $product
+     * @return string
+     */
+    public function render_product_loop_swatches($product) {
+        return $this->get_loop_swatches_html($product);
+    }
+
+    /**
      * Append loop swatches directly below the price HTML (Inside product content card)
      *
      * @param string $price_html

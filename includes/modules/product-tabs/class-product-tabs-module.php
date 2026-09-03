@@ -1,26 +1,26 @@
 <?php
 /**
- * WooCommerce Category Showcase Module (Slider & Grid for Elementor & Shortcode)
+ * Tabbed Product Carousel & Grid Module for Elementor & Shortcode
  *
- * @package OptimusBytes\WooKit\Modules\Category_Showcase
+ * @package OptimusBytes\WooKit\Modules\Product_Tabs
  */
 
-namespace OptimusBytes\WooKit\Modules\Category_Showcase;
+namespace OptimusBytes\WooKit\Modules\Product_Tabs;
 
 use OptimusBytes\WooKit\Modules\Abstract_Module;
 
 defined('ABSPATH') || exit;
 
-class Category_Showcase_Module extends Abstract_Module {
+class Product_Tabs_Module extends Abstract_Module {
 
     /**
      * Constructor
      */
     public function __construct() {
-        $this->id          = 'category_showcase';
-        $this->title       = __('Category Slider & Grid (Elementor & Shortcode)', 'optimus-bytes-woo-kit');
-        $this->description = __('Showcase WooCommerce product categories in a modern responsive carousel slider or grid with luxury skins, product counts, custom ordering, and Elementor live preview.', 'optimus-bytes-woo-kit');
-        $this->icon        = '🗂️';
+        $this->id          = 'product_tabs';
+        $this->title       = __('Tabbed Product Carousel (Elementor & Shortcode)', 'optimus-bytes-woo-kit');
+        $this->description = __('Display curated WooCommerce collections (Best Sellers, New Arrivals, Festive Sarees, On Sale) in a high-converting tabbed carousel with instant tab switching, variation swatches, and discount badges.', 'optimus-bytes-woo-kit');
+        $this->icon        = '🏷️';
         $this->category    = __('Product & UX', 'optimus-bytes-woo-kit');
     }
 
@@ -34,12 +34,12 @@ class Category_Showcase_Module extends Abstract_Module {
         add_action('elementor/elements/categories_registered', array($this, 'register_elementor_categories'));
         add_action('elementor/widgets/register', array($this, 'register_elementor_widgets'));
 
-        // Register Shortcode
-        add_shortcode('obwk_categories', array($this, 'render_shortcode'));
+        // Register Universal Shortcode
+        add_shortcode('obwk_product_tabs', array($this, 'render_shortcode'));
     }
 
     /**
-     * Register Custom Elementor Widget Category
+     * Register Custom Elementor Category
      *
      * @param \Elementor\Elements_Manager $elements_manager
      */
@@ -66,9 +66,9 @@ class Category_Showcase_Module extends Abstract_Module {
             return;
         }
 
-        require_once __DIR__ . '/widgets/class-category-slider-grid-widget.php';
-        if (class_exists(__NAMESPACE__ . '\Widgets\Category_Slider_Grid_Widget')) {
-            $widgets_manager->register(new Widgets\Category_Slider_Grid_Widget());
+        require_once __DIR__ . '/widgets/class-product-tabs-widget.php';
+        if (class_exists(__NAMESPACE__ . '\Widgets\Product_Tabs_Widget')) {
+            $widgets_manager->register(new Widgets\Product_Tabs_Widget());
         }
     }
 
@@ -80,33 +80,32 @@ class Category_Showcase_Module extends Abstract_Module {
     }
 
     /**
-     * Enqueue Frontend CSS and JavaScript
+     * Enqueue Frontend CSS and JavaScript Assets
      */
     public function enqueue_scripts() {
         wp_register_style(
-            'obwk-category-showcase-style',
-            OBWK_PLUGIN_URL . 'assets/css/category-showcase.css',
+            'obwk-product-tabs-style',
+            OBWK_PLUGIN_URL . 'assets/css/product-tabs.css',
             array(),
             OBWK_VERSION
         );
 
         wp_register_script(
-            'obwk-category-showcase-script',
-            OBWK_PLUGIN_URL . 'assets/js/category-showcase.js',
+            'obwk-product-tabs-script',
+            OBWK_PLUGIN_URL . 'assets/js/product-tabs.js',
             array('jquery'),
             OBWK_VERSION,
             true
         );
 
-        // Auto enqueue when enabled
         if ($this->is_enabled()) {
-            wp_enqueue_style('obwk-category-showcase-style');
-            wp_enqueue_script('obwk-category-showcase-script');
+            wp_enqueue_style('obwk-product-tabs-style');
+            wp_enqueue_script('obwk-product-tabs-script');
         }
     }
 
     /**
-     * Render Shortcode: [obwk_categories]
+     * Render Shortcode: [obwk_product_tabs]
      *
      * @param array $atts
      * @return string
@@ -118,28 +117,22 @@ class Category_Showcase_Module extends Abstract_Module {
 
         $atts = shortcode_atts(array(
             'layout'       => 'slider',
-            'skin'         => 'overlay',
-            'columns'      => '4',
+            'tab_style'    => 'pills',
             'limit'        => '8',
-            'source'       => 'all',
-            'parent'       => '0',
-            'orderby'      => 'menu_order',
-            'order'        => 'ASC',
-            'hide_empty'   => 'yes',
-            'show_count'   => 'yes',
-            'show_button'  => 'yes',
-            'button_text'  => __('Explore', 'optimus-bytes-woo-kit'),
-            'aspect_ratio' => 'ratio_3_4',
+            'columns'      => '4',
+            'show_badge'   => 'yes',
+            'show_rating'  => 'yes',
+            'show_swatches'=> 'yes',
+            'show_btn'     => 'yes',
             'autoplay'     => 'yes',
-            'loop'         => 'yes',
             'arrows'       => 'yes',
             'dots'         => 'yes',
-        ), $atts, 'obwk_categories');
+        ), $atts, 'obwk_product_tabs');
 
-        wp_enqueue_style('obwk-category-showcase-style');
-        wp_enqueue_script('obwk-category-showcase-script');
+        wp_enqueue_style('obwk-product-tabs-style');
+        wp_enqueue_script('obwk-product-tabs-script');
 
-        require_once __DIR__ . '/widgets/class-category-slider-grid-widget.php';
-        return Widgets\Category_Slider_Grid_Widget::render_showcase_html($atts);
+        require_once __DIR__ . '/widgets/class-product-tabs-widget.php';
+        return Widgets\Product_Tabs_Widget::render_tabs_html($atts);
     }
 }
