@@ -1,0 +1,375 @@
+/* ==========================================================================
+   Optimus Bytes Woo Kit - Category Slider & Grid Showcase Styles
+   ========================================================================== */
+
+.obwk-category-showcase {
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 10px 0 20px 0;
+}
+
+/* ==========================================
+   Grid Layout
+   ========================================== */
+.obwk-category-grid {
+    display: grid;
+    gap: 20px;
+    width: 100%;
+}
+
+.obwk-grid-cols-1 .obwk-category-grid { grid-template-columns: repeat(1, 1fr); }
+.obwk-grid-cols-2 .obwk-category-grid { grid-template-columns: repeat(2, 1fr); }
+.obwk-grid-cols-3 .obwk-category-grid { grid-template-columns: repeat(3, 1fr); }
+.obwk-grid-cols-4 .obwk-category-grid { grid-template-columns: repeat(4, 1fr); }
+.obwk-grid-cols-5 .obwk-category-grid { grid-template-columns: repeat(5, 1fr); }
+.obwk-grid-cols-6 .obwk-category-grid { grid-template-columns: repeat(6, 1fr); }
+
+@media (max-width: 1024px) {
+    .obwk-grid-tablet-1 .obwk-category-grid { grid-template-columns: repeat(1, 1fr); }
+    .obwk-grid-tablet-2 .obwk-category-grid { grid-template-columns: repeat(2, 1fr); }
+    .obwk-grid-tablet-3 .obwk-category-grid { grid-template-columns: repeat(3, 1fr); }
+    .obwk-grid-tablet-4 .obwk-category-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (max-width: 640px) {
+    .obwk-category-grid { gap: 12px; }
+    .obwk-grid-mobile-1 .obwk-category-grid { grid-template-columns: repeat(1, 1fr); }
+    .obwk-grid-mobile-2 .obwk-category-grid { grid-template-columns: repeat(2, 1fr); }
+    .obwk-grid-mobile-3 .obwk-category-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ==========================================
+   Slider / Carousel (Swiper)
+   ========================================== */
+.obwk-showcase-layout-slider {
+    padding-bottom: 25px;
+}
+
+.obwk-category-swiper {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    padding: 6px 0;
+}
+
+.obwk-category-swiper .swiper-slide {
+    height: auto;
+    display: flex;
+}
+
+.obwk-category-swiper .swiper-slide .obwk-category-card {
+    width: 100%;
+}
+
+/* Navigation Arrows */
+.obwk-swiper-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #0f172a;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.obwk-swiper-arrow:hover {
+    background-color: var(--theme-color, #c5a059);
+    color: #ffffff;
+    transform: translateY(-50%) scale(1.08);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.obwk-swiper-prev { left: -20px; }
+.obwk-swiper-next { right: -20px; }
+
+.obwk-arrows-pos-inside .obwk-swiper-prev { left: 12px; }
+.obwk-arrows-pos-inside .obwk-swiper-next { right: 12px; }
+
+@media (max-width: 768px) {
+    .obwk-swiper-prev { left: 6px; width: 34px; height: 34px; }
+    .obwk-swiper-next { right: 6px; width: 34px; height: 34px; }
+}
+
+/* Pagination Dots */
+.obwk-swiper-pagination {
+    position: absolute;
+    bottom: 0 !important;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    z-index: 5;
+}
+
+.obwk-swiper-pagination .swiper-pagination-bullet {
+    width: 8px;
+    height: 8px;
+    margin: 0 4px;
+    border-radius: 4px;
+    background-color: #64748b;
+    opacity: 0.4;
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+.obwk-swiper-pagination .swiper-pagination-bullet-active {
+    width: 24px;
+    background-color: var(--theme-color, #c5a059) !important;
+    opacity: 1;
+}
+
+/* ==========================================
+   Base Category Card
+   ========================================== */
+.obwk-category-card {
+    position: relative;
+    box-sizing: border-box;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 12px;
+}
+
+.obwk-category-card-link {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none !important;
+    color: inherit !important;
+    width: 100%;
+    height: 100%;
+}
+
+.obwk-category-img-wrap {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 12px;
+    background-color: #f1f5f9;
+}
+
+.obwk-category-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.obwk-category-card:hover .obwk-category-img {
+    transform: scale(1.08);
+}
+
+/* Aspect Ratios */
+.obwk-showcase-aspect-ratio_3_4 .obwk-category-img-wrap { aspect-ratio: 3 / 4; }
+.obwk-showcase-aspect-ratio_1_1 .obwk-category-img-wrap { aspect-ratio: 1 / 1; }
+.obwk-showcase-aspect-ratio_4_5 .obwk-category-img-wrap { aspect-ratio: 4 / 5; }
+.obwk-showcase-aspect-ratio_16_9 .obwk-category-img-wrap { aspect-ratio: 16 / 9; }
+.obwk-showcase-aspect-ratio_auto .obwk-category-img-wrap { aspect-ratio: auto; min-height: 200px; }
+
+/* Count Badge */
+.obwk-category-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--theme-color-light, #c5a059);
+}
+
+.obwk-count-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: #ffffff;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    z-index: 3;
+}
+
+/* ==========================================
+   Skin: Overlay / Luxury Gradient (Saree/Fashion)
+   ========================================== */
+.obwk-card-skin-overlay {
+    overflow: hidden;
+    background: #0f172a;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.obwk-card-skin-overlay .obwk-category-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.4) 45%, transparent 100%);
+    transition: opacity 0.3s ease;
+    z-index: 2;
+}
+
+.obwk-card-skin-overlay:hover .obwk-category-overlay {
+    background: linear-gradient(to top, rgba(15, 23, 42, 0.98) 0%, rgba(15, 23, 42, 0.55) 55%, rgba(15, 23, 42, 0.2) 100%);
+}
+
+.obwk-card-skin-overlay .obwk-category-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 16px;
+    box-sizing: border-box;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.obwk-card-skin-overlay .obwk-category-title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.3;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+    transition: color 0.2s ease;
+}
+
+.obwk-card-skin-overlay .obwk-category-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--theme-color-light, #e5ba59);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+    transition: transform 0.2s ease;
+}
+
+.obwk-card-skin-overlay:hover .obwk-category-btn {
+    transform: translateX(3px);
+}
+
+.obwk-card-skin-overlay:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+}
+
+/* ==========================================
+   Skin: Classic Card (Image on Top, Info Below)
+   ========================================== */
+.obwk-card-skin-classic {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.obwk-card-skin-classic .obwk-category-info {
+    padding: 12px 4px 4px 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.obwk-card-skin-classic .obwk-category-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.3;
+}
+
+.obwk-card-skin-classic .obwk-category-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--theme-color, #c5a059);
+    margin-top: 4px;
+}
+
+.obwk-card-skin-classic:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+    border-color: var(--theme-color, #c5a059);
+}
+
+/* ==========================================
+   Skin: Circular Story (Avatar with Accent Ring)
+   ========================================== */
+.obwk-card-skin-circle {
+    background: transparent;
+    text-align: center;
+}
+
+.obwk-card-skin-circle .obwk-category-img-wrap {
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 50% !important;
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 0 2px var(--theme-color, #c5a059), 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin: 0 auto 10px auto;
+    width: 85%;
+    max-width: 140px;
+}
+
+.obwk-card-skin-circle .obwk-category-title {
+    margin: 0 0 2px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: inherit;
+    line-height: 1.3;
+}
+
+.obwk-card-skin-circle:hover .obwk-category-img-wrap {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 3px var(--theme-color, #c5a059), 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* ==========================================
+   Skin: Banner Card
+   ========================================== */
+.obwk-card-skin-banner {
+    background: #1e293b;
+    color: #ffffff;
+    overflow: hidden;
+    position: relative;
+}
+
+.obwk-card-skin-banner .obwk-category-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+}
+
+.obwk-card-skin-banner .obwk-category-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+/* Empty notice */
+.obwk-category-empty-notice {
+    padding: 24px;
+    text-align: center;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    color: #64748b;
+    font-size: 14px;
+}

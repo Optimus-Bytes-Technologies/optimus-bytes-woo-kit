@@ -87,6 +87,9 @@ class Plugin {
         // Register Sticky Add to Cart & Buy Now Bar Module
         $this->register_module(new Modules\Sticky_Add_To_Cart\Sticky_Add_To_Cart_Module());
 
+        // Register Category Showcase Module (Elementor Slider & Grid)
+        $this->register_module(new Modules\Category_Showcase\Category_Showcase_Module());
+
         /**
          * Action to register additional custom modules
          *
