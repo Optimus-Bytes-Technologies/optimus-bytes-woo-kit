@@ -34,6 +34,8 @@
     border-radius: 50%;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
     border: 2px solid transparent;
+    background-origin: border-box;
+    background-repeat: no-repeat;
 }
 
 /* Size Variants (Colors) */
@@ -231,6 +233,8 @@
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     box-sizing: border-box;
+    background-origin: border-box;
+    background-repeat: no-repeat;
 }
 
 .obwk-loop-swatches.obwk-shape-square .obwk-loop-swatch {
