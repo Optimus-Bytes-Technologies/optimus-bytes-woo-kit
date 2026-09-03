@@ -196,7 +196,7 @@
     $(document).on('mouseenter click', '.obwk-loop-swatch', function (e) {
         const $swatch = $(this);
         const $wrapper = $swatch.closest('.obwk-loop-swatches');
-        const newImgSrc = $swatch.data('image-src');
+        const newImgSrc = $swatch.data('image-src') || $swatch.attr('data-image-src');
         
         if (!newImgSrc) {
             return;
@@ -206,27 +206,27 @@
         $swatch.addClass('is-active');
 
         // Find product card image
-        const $card = $swatch.closest('.product, .thunk-product, .product-inner, .grid-item, li.product');
-        const $img = $card.find('img.wp-post-image, img.attachment-woocommerce_thumbnail, .thunk-product-image img, .woocommerce-LoopProduct-link img').first();
+        const $card = $swatch.closest('.obwk-product-card, .product, .thunk-product, .product-inner, .grid-item, li.product, article.product');
+        const $img = $card.find('.obwk-primary-img, img.wp-post-image, img.attachment-woocommerce_thumbnail, .thunk-product-image img, .woocommerce-LoopProduct-link img, .obwk-product-img-box img').first();
 
         if ($img.length && $img.attr('src') !== newImgSrc) {
             if (!$img.data('obwk_orig_src')) {
                 $img.data('obwk_orig_src', $img.attr('src'));
                 $img.data('obwk_orig_srcset', $img.attr('srcset') || '');
             }
-            $img.css('transition', 'opacity 0.2s ease').css('opacity', 0.6);
+            $img.css('transition', 'opacity 0.2s ease').css('opacity', 0.5);
             setTimeout(function () {
                 $img.attr('src', newImgSrc).removeAttr('srcset').css('opacity', 1);
-            }, 120);
+            }, 100);
         }
     });
 
     // Reset loop image on mouse leave if desired
     $(document).on('mouseleave', '.obwk-loop-swatches', function () {
         const $wrapper = $(this);
-        const defaultImg = $wrapper.data('default-image');
-        const $card = $wrapper.closest('.product, .thunk-product, .product-inner, .grid-item, li.product');
-        const $img = $card.find('img.wp-post-image, img.attachment-woocommerce_thumbnail, .thunk-product-image img, .woocommerce-LoopProduct-link img').first();
+        const defaultImg = $wrapper.data('default-image') || $wrapper.attr('data-default-image');
+        const $card = $wrapper.closest('.obwk-product-card, .product, .thunk-product, .product-inner, .grid-item, li.product, article.product');
+        const $img = $card.find('.obwk-primary-img, img.wp-post-image, img.attachment-woocommerce_thumbnail, .thunk-product-image img, .woocommerce-LoopProduct-link img, .obwk-product-img-box img').first();
 
         if ($img.length && $img.data('obwk_orig_src')) {
             $img.attr('src', $img.data('obwk_orig_src'));

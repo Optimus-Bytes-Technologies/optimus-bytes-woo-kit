@@ -189,6 +189,51 @@
         });
     });
 
+    // Swatch Hover & Click Image Switcher on Carousel Product Cards
+    $(document).on('mouseenter click', '.obwk-product-card .obwk-loop-swatch', function (e) {
+        var $swatch = $(this);
+        var $wrapper = $swatch.closest('.obwk-loop-swatches');
+        var newImgSrc = $swatch.attr('data-image-src') || $swatch.data('image-src');
+
+        if (!newImgSrc) {
+            return;
+        }
+
+        $wrapper.find('.obwk-loop-swatch').removeClass('is-active');
+        $swatch.addClass('is-active');
+
+        var $card = $swatch.closest('.obwk-product-card, .product');
+        var $img = $card.find('.obwk-primary-img, img.wp-post-image, .obwk-product-img-box img').first();
+
+        if ($img.length) {
+            if (!$img.data('obwk_orig_src')) {
+                $img.data('obwk_orig_src', $img.attr('src') || '');
+                $img.data('obwk_orig_srcset', $img.attr('srcset') || '');
+            }
+
+            if ($img.attr('src') !== newImgSrc) {
+                $img.css('transition', 'opacity 0.2s ease').css('opacity', 0.5);
+                setTimeout(function () {
+                    $img.attr('src', newImgSrc).removeAttr('srcset').css('opacity', 1);
+                }, 80);
+            }
+        }
+    });
+
+    $(document).on('mouseleave', '.obwk-product-card .obwk-loop-swatches', function () {
+        var $wrapper = $(this);
+        var $card = $wrapper.closest('.obwk-product-card, .product');
+        var $img = $card.find('.obwk-primary-img, img.wp-post-image, .obwk-product-img-box img').first();
+
+        if ($img.length && $img.data('obwk_orig_src')) {
+            $img.attr('src', $img.data('obwk_orig_src'));
+            if ($img.data('obwk_orig_srcset')) {
+                $img.attr('srcset', $img.data('obwk_orig_srcset'));
+            }
+            $wrapper.find('.obwk-loop-swatch').removeClass('is-active');
+        }
+    });
+
     // Remove loading state on WooCommerce fragment refresh
     $(document.body).on('added_to_cart wc_fragments_refreshed', function (e, fragments, cart_hash, $button) {
         if ($button && $button.length) {

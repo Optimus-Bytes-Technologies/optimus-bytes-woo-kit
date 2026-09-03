@@ -485,13 +485,29 @@ class Variation_Swatches_Module extends Abstract_Module {
         $max_visible   = 5;
         $count         = 0;
 
-        // Map variations by color slug for instant image switching
+        // Map variations by color slug / name for instant image switching
         $color_images = array();
         foreach ($variations as $var) {
-            $attr_name = 'attribute_' . sanitize_title($color_attr_key);
-            $var_color = isset($var['attributes'][$attr_name]) ? $var['attributes'][$attr_name] : '';
-            if (!empty($var_color) && !empty($var['image']['src']) && !isset($color_images[$var_color])) {
-                $color_images[$var_color] = $var['image']['src'];
+            $attr_name1 = 'attribute_' . sanitize_title($color_attr_key);
+            $attr_name2 = 'attribute_' . $color_attr_key;
+
+            $var_color = '';
+            if (isset($var['attributes'][$attr_name1])) {
+                $var_color = $var['attributes'][$attr_name1];
+            } elseif (isset($var['attributes'][$attr_name2])) {
+                $var_color = $var['attributes'][$attr_name2];
+            }
+
+            $var_img = '';
+            if (!empty($var['image']['src'])) {
+                $var_img = $var['image']['src'];
+            } elseif (!empty($var['image_id'])) {
+                $var_img = wp_get_attachment_image_url($var['image_id'], 'woocommerce_thumbnail');
+            }
+
+            if (!empty($var_color) && !empty($var_img)) {
+                $color_images[$var_color] = $var_img;
+                $color_images[sanitize_title($var_color)] = $var_img;
             }
         }
 
@@ -512,7 +528,15 @@ class Variation_Swatches_Module extends Abstract_Module {
             $term_name = is_object($term) ? $term->name : $option;
             $term_slug = is_object($term) ? $term->slug : $option;
             $color_hex = self::resolve_color_hex($term);
-            $img_src   = isset($color_images[$term_slug]) ? $color_images[$term_slug] : $main_image_url;
+
+            $img_src = $main_image_url;
+            if (isset($color_images[$term_slug])) {
+                $img_src = $color_images[$term_slug];
+            } elseif (isset($color_images[sanitize_title($term_slug)])) {
+                $img_src = $color_images[sanitize_title($term_slug)];
+            } elseif (isset($color_images[$term_name])) {
+                $img_src = $color_images[$term_name];
+            }
 
             $html .= sprintf(
                 '<span class="obwk-loop-swatch" style="background: %s;" data-image-src="%s" data-tooltip="%s" title="%s" role="button" tabindex="0"><span class="obwk-loop-swatch-inner"></span></span>',
