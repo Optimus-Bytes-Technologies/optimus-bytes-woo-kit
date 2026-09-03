@@ -6,6 +6,11 @@
 (function ($) {
     'use strict';
 
+    // Global safety guard for theme/plugin cart variables
+    if (typeof window.storeOneCart === 'undefined') {
+        window.storeOneCart = { cartFoatVisible: false, cartOpen: 'simple-open' };
+    }
+
     /**
      * Initialize Product Tabs & Swiper Carousels
      *
@@ -115,6 +120,87 @@
             });
         });
     }
+
+    // AJAX Add to Cart Handler for Carousel Cards
+    $(document).on('click', '.obwk-card-actions .ajax_add_to_cart, .obwk-card-actions .add_to_cart_button', function (e) {
+        var $btn = $(this);
+
+        // If variable, external, or grouped product, let browser follow link to product page
+        if ($btn.hasClass('product_type_variable') || $btn.hasClass('product_type_external') || $btn.hasClass('product_type_grouped')) {
+            return;
+        }
+
+        var productId = $btn.data('product_id') || $btn.attr('data-product_id');
+        if (!productId) {
+            return;
+        }
+
+        e.preventDefault();
+
+        if ($btn.hasClass('loading')) {
+            return;
+        }
+
+        $btn.removeClass('added').addClass('loading');
+
+        var data = {
+            'product_id': productId,
+            'quantity': $btn.data('quantity') || 1
+        };
+
+        // Determine AJAX endpoint
+        var ajaxUrl = (typeof obwkProductTabs !== 'undefined' && obwkProductTabs.wc_ajax_url)
+            ? obwkProductTabs.wc_ajax_url.replace('%%endpoint%%', 'add_to_cart')
+            : (window.wc_add_to_cart_params && window.wc_add_to_cart_params.wc_ajax_url
+                ? window.wc_add_to_cart_params.wc_ajax_url.replace('%%endpoint%%', 'add_to_cart')
+                : '/?wc-ajax=add_to_cart');
+
+        $.ajax({
+            type: 'POST',
+            url: ajaxUrl,
+            data: data,
+            dataType: 'json',
+            success: function (response) {
+                $btn.removeClass('loading');
+
+                if (response.error && response.product_url) {
+                    window.location = response.product_url;
+                    return;
+                }
+
+                $btn.addClass('added');
+
+                // Trigger standard WooCommerce and 3rd-party cart refresh events
+                $(document.body).trigger('added_to_cart', [response.fragments, response.cart_hash, $btn]);
+                $(document).trigger('added_to_cart', [response.fragments, response.cart_hash, $btn]);
+                $(document.body).trigger('wc_fragment_refresh');
+                $(document.body).trigger('wc_fragments_refreshed');
+
+                // Replace fragments manually if available
+                if (response.fragments) {
+                    $.each(response.fragments, function (key, value) {
+                        $(key).replaceWith(value);
+                    });
+                }
+            },
+            error: function () {
+                $btn.removeClass('loading');
+            }
+        });
+    });
+
+    // Remove loading state on WooCommerce fragment refresh
+    $(document.body).on('added_to_cart wc_fragments_refreshed', function (e, fragments, cart_hash, $button) {
+        if ($button && $button.length) {
+            $button.removeClass('loading').addClass('added');
+        } else {
+            $('.obwk-card-actions .add_to_cart_button.loading').removeClass('loading').addClass('added');
+        }
+    });
+
+    $(document.body).on('wc_fragments_ajax_error', function () {
+        $('.obwk-card-actions .add_to_cart_button.loading').removeClass('loading');
+    });
 
     // Standard DOM Ready
     $(document).ready(function () {

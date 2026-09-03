@@ -83,6 +83,11 @@ class Product_Tabs_Module extends Abstract_Module {
      * Enqueue Frontend CSS and JavaScript Assets
      */
     public function enqueue_scripts() {
+        if (function_exists('WC')) {
+            wp_enqueue_script('wc-add-to-cart');
+            wp_enqueue_script('wc-cart-fragments');
+        }
+
         wp_register_style(
             'obwk-product-tabs-style',
             OBWK_PLUGIN_URL . 'assets/css/product-tabs.css',
@@ -96,6 +101,17 @@ class Product_Tabs_Module extends Abstract_Module {
             array('jquery'),
             OBWK_VERSION,
             true
+        );
+
+        wp_localize_script(
+            'obwk-product-tabs-script',
+            'obwkProductTabs',
+            array(
+                'ajax_url'       => admin_url('admin-ajax.php'),
+                'wc_ajax_url'    => class_exists('\WC_AJAX') ? \WC_AJAX::get_endpoint('%%endpoint%%') : '/?wc-ajax=%%endpoint%%',
+                'cart_url'       => function_exists('wc_get_cart_url') ? wc_get_cart_url() : '',
+                'i18n_view_cart' => esc_html__('View cart', 'woocommerce'),
+            )
         );
 
         if ($this->is_enabled()) {

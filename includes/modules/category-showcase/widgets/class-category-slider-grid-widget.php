@@ -574,6 +574,17 @@ class Category_Slider_Grid_Widget extends Widget_Base {
         );
 
         $this->add_control(
+            'img_box_bg_color',
+            array(
+                'label'     => __('Image Box Background Color', 'optimus-bytes-woo-kit'),
+                'type'      => Controls_Manager::COLOR,
+                'selectors' => array(
+                    '{{WRAPPER}} .obwk-category-img-wrap' => 'background-color: {{VALUE}} !important;',
+                ),
+            )
+        );
+
+        $this->add_control(
             'info_bg_color',
             array(
                 'label'     => __('Content Box Background Color', 'optimus-bytes-woo-kit'),

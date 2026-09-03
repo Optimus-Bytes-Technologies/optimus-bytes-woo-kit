@@ -517,7 +517,40 @@ class Product_Tabs_Widget extends Widget_Base {
                 'label'     => __('Tab Text Color (Inactive)', 'optimus-bytes-woo-kit'),
                 'type'      => Controls_Manager::COLOR,
                 'selectors' => array(
-                    '{{WRAPPER}} .obwk-tab-btn' => 'color: {{VALUE}};',
+                    '{{WRAPPER}} .obwk-tab-btn:not(.is-active)' => 'color: {{VALUE}};',
+                ),
+            )
+        );
+
+        $this->add_control(
+            'tab_inactive_bg',
+            array(
+                'label'     => __('Tab Background (Inactive)', 'optimus-bytes-woo-kit'),
+                'type'      => Controls_Manager::COLOR,
+                'selectors' => array(
+                    '{{WRAPPER}} .obwk-tab-btn:not(.is-active)' => 'background-color: {{VALUE}} !important;',
+                ),
+            )
+        );
+
+        $this->add_control(
+            'tab_inactive_hover_color',
+            array(
+                'label'     => __('Tab Text Color (Hover)', 'optimus-bytes-woo-kit'),
+                'type'      => Controls_Manager::COLOR,
+                'selectors' => array(
+                    '{{WRAPPER}} .obwk-tab-btn:not(.is-active):hover' => 'color: {{VALUE}} !important;',
+                ),
+            )
+        );
+
+        $this->add_control(
+            'tab_inactive_hover_bg',
+            array(
+                'label'     => __('Tab Background (Hover)', 'optimus-bytes-woo-kit'),
+                'type'      => Controls_Manager::COLOR,
+                'selectors' => array(
+                    '{{WRAPPER}} .obwk-tab-btn:not(.is-active):hover' => 'background-color: {{VALUE}} !important;',
                 ),
             )
         );
@@ -596,6 +629,17 @@ class Product_Tabs_Widget extends Widget_Base {
                 'label'    => __('Card Background (Gradient/Image)', 'optimus-bytes-woo-kit'),
                 'types'    => array('classic', 'gradient'),
                 'selector' => '{{WRAPPER}} .obwk-product-card',
+            )
+        );
+
+        $this->add_control(
+            'img_box_bg_color',
+            array(
+                'label'     => __('Image Box Background Color', 'optimus-bytes-woo-kit'),
+                'type'      => Controls_Manager::COLOR,
+                'selectors' => array(
+                    '{{WRAPPER}} .obwk-product-img-box' => 'background-color: {{VALUE}} !important;',
+                ),
             )
         );
 
@@ -706,6 +750,98 @@ class Product_Tabs_Widget extends Widget_Base {
         );
 
         $this->end_controls_section();
+
+        // ==========================================
+        // TAB: STYLE - Add to Cart Button
+        // ==========================================
+        $this->start_controls_section(
+            'section_style_button',
+            array(
+                'label'     => __('Add to Cart Button', 'optimus-bytes-woo-kit'),
+                'tab'       => Controls_Manager::TAB_STYLE,
+                'condition' => array(
+                    'show_add_to_cart' => 'yes',
+                ),
+            )
+        );
+
+        $this->add_control(
+            'btn_text_color',
+            array(
+                'label'     => __('Button Text Color', 'optimus-bytes-woo-kit'),
+                'type'      => Controls_Manager::COLOR,
+                'selectors' => array(
+                    '{{WRAPPER}} .obwk-card-actions .button, {{WRAPPER}} .obwk-card-actions a.button' => 'color: {{VALUE}} !important;',
+                ),
+            )
+        );
+
+        $this->add_control(
+            'btn_bg_color',
+            array(
+                'label'     => __('Button Background Color', 'optimus-bytes-woo-kit'),
+                'type'      => Controls_Manager::COLOR,
+                'selectors' => array(
+                    '{{WRAPPER}} .obwk-card-actions .button, {{WRAPPER}} .obwk-card-actions a.button' => 'background-color: {{VALUE}} !important;',
+                ),
+            )
+        );
+
+        $this->add_control(
+            'btn_hover_text_color',
+            array(
+                'label'     => __('Button Hover Text Color', 'optimus-bytes-woo-kit'),
+                'type'      => Controls_Manager::COLOR,
+                'selectors' => array(
+                    '{{WRAPPER}} .obwk-card-actions .button:hover, {{WRAPPER}} .obwk-card-actions a.button:hover' => 'color: {{VALUE}} !important;',
+                ),
+            )
+        );
+
+        $this->add_control(
+            'btn_hover_bg_color',
+            array(
+                'label'     => __('Button Hover Background Color', 'optimus-bytes-woo-kit'),
+                'type'      => Controls_Manager::COLOR,
+                'selectors' => array(
+                    '{{WRAPPER}} .obwk-card-actions .button:hover, {{WRAPPER}} .obwk-card-actions a.button:hover' => 'background-color: {{VALUE}} !important;',
+                ),
+            )
+        );
+
+        $this->add_group_control(
+            Group_Control_Typography::get_type(),
+            array(
+                'name'     => 'btn_typography',
+                'selector' => '{{WRAPPER}} .obwk-card-actions .button, {{WRAPPER}} .obwk-card-actions a.button',
+            )
+        );
+
+        $this->add_responsive_control(
+            'btn_border_radius',
+            array(
+                'label'      => __('Border Radius', 'optimus-bytes-woo-kit'),
+                'type'       => Controls_Manager::DIMENSIONS,
+                'size_units' => array('px', '%'),
+                'selectors'  => array(
+                    '{{WRAPPER}} .obwk-card-actions .button, {{WRAPPER}} .obwk-card-actions a.button' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}} !important;',
+                ),
+            )
+        );
+
+        $this->add_responsive_control(
+            'btn_padding',
+            array(
+                'label'      => __('Padding', 'optimus-bytes-woo-kit'),
+                'type'       => Controls_Manager::DIMENSIONS,
+                'size_units' => array('px', 'em', '%'),
+                'selectors'  => array(
+                    '{{WRAPPER}} .obwk-card-actions .button, {{WRAPPER}} .obwk-card-actions a.button' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}} !important;',
+                ),
+            )
+        );
+
+        $this->end_controls_section();
     }
 
     /**
@@ -791,20 +927,24 @@ class Product_Tabs_Widget extends Widget_Base {
     /**
      * Render Single Product Card HTML
      *
-     * @param \WC_Product $product
+     * @param \WC_Product $current_product
      * @param array $settings
      * @return string
      */
-    public static function render_product_card($product, $settings) {
-        if (!$product) {
+    public static function render_product_card($current_product, $settings) {
+        if (!$current_product) {
             return '';
         }
 
-        $product_id         = $product->get_id();
-        $title              = $product->get_name();
-        $permalink          = $product->get_permalink();
-        $image_id           = $product->get_image_id();
-        $gallery_image_ids  = $product->get_gallery_image_ids();
+        global $product;
+        $prev_product = $product;
+        $product      = $current_product;
+
+        $product_id         = $current_product->get_id();
+        $title              = $current_product->get_name();
+        $permalink          = $current_product->get_permalink();
+        $image_id           = $current_product->get_image_id();
+        $gallery_image_ids  = $current_product->get_gallery_image_ids();
         $secondary_image_id = (!empty($gallery_image_ids)) ? $gallery_image_ids[0] : null;
 
         $show_secondary     = (!empty($settings['show_secondary_image']) && 'yes' === $settings['show_secondary_image']);
@@ -816,9 +956,9 @@ class Product_Tabs_Widget extends Widget_Base {
 
         // Calculate discount percentage if on sale
         $discount_pct = 0;
-        if ($product->is_on_sale()) {
-            $regular_price = (float) $product->get_regular_price();
-            $sale_price    = (float) $product->get_sale_price();
+        if ($current_product->is_on_sale()) {
+            $regular_price = (float) $current_product->get_regular_price();
+            $sale_price    = (float) $current_product->get_sale_price();
             if ($regular_price > 0 && $sale_price > 0 && $regular_price > $sale_price) {
                 $discount_pct = round((($regular_price - $sale_price) / $regular_price) * 100);
             }
@@ -856,9 +996,9 @@ class Product_Tabs_Widget extends Widget_Base {
             </div>
 
             <div class="obwk-product-content">
-                <?php if ($show_rating && $product->get_average_rating() > 0) : ?>
+                <?php if ($show_rating && $current_product->get_average_rating() > 0) : ?>
                     <div class="obwk-product-rating">
-                        <?php echo wc_get_rating_html($product->get_average_rating()); ?>
+                        <?php echo wc_get_rating_html($current_product->get_average_rating()); ?>
                     </div>
                 <?php endif; ?>
 
@@ -867,27 +1007,40 @@ class Product_Tabs_Widget extends Widget_Base {
                 </h4>
 
                 <div class="obwk-product-price">
-                    <?php echo $product->get_price_html(); ?>
+                    <?php echo $current_product->get_price_html(); ?>
                 </div>
 
                 <?php 
                 // Render Swatches if variable product
-                if ($show_swatches && $product->is_type('variable') && class_exists('OptimusBytes\WooKit\Modules\Variation_Swatches\Variation_Swatches_Module')) : 
+                if ($show_swatches && $current_product->is_type('variable') && class_exists('OptimusBytes\WooKit\Modules\Variation_Swatches\Variation_Swatches_Module')) : 
                     $swatches_module = new \OptimusBytes\WooKit\Modules\Variation_Swatches\Variation_Swatches_Module();
                     if (method_exists($swatches_module, 'get_loop_swatches_html')) {
-                        echo $swatches_module->get_loop_swatches_html($product);
+                        echo $swatches_module->get_loop_swatches_html($current_product);
                     }
                 endif; 
                 ?>
 
                 <?php if ($show_add_to_cart) : ?>
                     <div class="obwk-card-actions">
-                        <?php woocommerce_template_loop_add_to_cart(); ?>
+                        <?php 
+                        if (function_exists('woocommerce_template_loop_add_to_cart')) {
+                            woocommerce_template_loop_add_to_cart();
+                        } else {
+                            $btn_url  = $current_product->add_to_cart_url();
+                            $btn_text = $current_product->add_to_cart_text();
+                            echo sprintf(
+                                '<a href="%s" class="button add_to_cart_button">%s</a>',
+                                esc_url($btn_url),
+                                esc_html($btn_text)
+                            );
+                        }
+                        ?>
                     </div>
                 <?php endif; ?>
             </div>
         </div>
         <?php
+        $product = $prev_product;
         return ob_get_clean();
     }
 
