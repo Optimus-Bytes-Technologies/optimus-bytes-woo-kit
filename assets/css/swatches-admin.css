@@ -1,0 +1,98 @@
+/* ==========================================================================
+   Optimus Bytes Woo Kit - Variation Swatches Admin Styles
+   ========================================================================== */
+
+/* Form Fields */
+.obwk-swatch-field-wrap {
+    margin-bottom: 15px;
+}
+
+.obwk-swatch-field-wrap .wp-picker-container {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Live Preview Card */
+.obwk-admin-preview-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: #ffffff;
+    border: 1px solid #dcdcde;
+    padding: 8px 16px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-top: 6px;
+}
+
+.obwk-admin-preview-circle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    display: inline-block;
+    vertical-align: middle;
+    box-sizing: border-box;
+    background-origin: border-box;
+    background-repeat: no-repeat;
+    background-color: #14b8a6;
+    flex-shrink: 0;
+}
+
+.obwk-admin-preview-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+/* Image Uploader */
+.obwk-image-uploader-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+.obwk-image-preview img {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #c3c4c7;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    display: block;
+}
+
+.obwk-remove-image-btn {
+    color: #b32d2e !important;
+    border-color: #b32d2e !important;
+}
+
+.obwk-remove-image-btn:hover {
+    background: #fbeaea !important;
+}
+
+/* Term List Table Column */
+.column-obwk_swatch_preview {
+    width: 60px;
+    text-align: center !important;
+}
+
+.obwk-admin-table-swatch {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    vertical-align: middle;
+    box-sizing: border-box;
+    background-origin: border-box;
+    background-repeat: no-repeat;
+}
+
+.obwk-admin-table-swatch-img {
+    object-fit: cover;
+}

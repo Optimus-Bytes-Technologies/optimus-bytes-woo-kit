@@ -81,6 +81,13 @@ class Variation_Swatches_Module extends Abstract_Module {
     );
 
     /**
+     * Admin Handler
+     *
+     * @var Variation_Swatches_Admin|null
+     */
+    private $admin = null;
+
+    /**
      * Constructor
      */
     public function __construct() {
@@ -95,6 +102,12 @@ class Variation_Swatches_Module extends Abstract_Module {
      * Initialize module hooks
      */
     public function init() {
+        if (is_admin()) {
+            require_once __DIR__ . '/class-variation-swatches-admin.php';
+            $this->admin = new Variation_Swatches_Admin($this);
+            $this->admin->init();
+        }
+
         add_action('customize_register', array($this, 'register_customizer_settings'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
 
@@ -284,10 +297,18 @@ class Variation_Swatches_Module extends Abstract_Module {
 
         // 1. Check custom term meta if stored
         if (is_object($term) && isset($term->term_id)) {
-            $custom_color = get_term_meta($term->term_id, 'obwk_swatch_color', true);
+            $swatch_type     = get_term_meta($term->term_id, 'obwk_swatch_type', true);
+            $custom_color    = get_term_meta($term->term_id, 'obwk_swatch_color', true);
+            $secondary_color = get_term_meta($term->term_id, 'obwk_swatch_color_secondary', true);
+
+            if ('dual_color' === $swatch_type && !empty($custom_color) && !empty($secondary_color)) {
+                return "linear-gradient(135deg, {$custom_color} 50%, {$secondary_color} 50%)";
+            }
+
             if (!empty($custom_color)) {
                 return $custom_color;
             }
+
             $thvs_color = get_term_meta($term->term_id, 'thvs_color', true);
             if (!empty($thvs_color)) {
                 return $thvs_color;
