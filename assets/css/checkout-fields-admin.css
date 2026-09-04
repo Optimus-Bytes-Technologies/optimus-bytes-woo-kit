@@ -1,0 +1,705 @@
+/* ==========================================================================
+   Optimus Bytes Woo Kit - Checkout Field Customizer Admin Styles
+   ========================================================================== */
+
+.obwk-checkout-fields-wrap {
+    max-width: 1200px;
+    margin: 20px 20px 40px 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    color: #1e293b;
+}
+
+/* Tab Navigation */
+.obwk-tabs-container {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.obwk-tab-nav {
+    display: flex;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0 12px;
+    gap: 8px;
+    overflow-x: auto;
+}
+
+.obwk-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 20px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.obwk-tab-btn:hover {
+    color: #1e293b;
+    background: rgba(241, 245, 249, 0.7);
+}
+
+.obwk-tab-btn.is-active {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+    background: #ffffff;
+}
+
+.obwk-tab-icon {
+    font-size: 16px;
+}
+
+.obwk-tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 10px;
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.obwk-tab-btn.is-active .obwk-tab-count {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+/* Tab Panes */
+.obwk-tab-content {
+    padding: 24px;
+}
+
+.obwk-tab-pane {
+    display: none;
+}
+
+.obwk-tab-pane.is-active {
+    display: block;
+    animation: obwkFadeIn 0.2s ease forwards;
+}
+
+@keyframes obwkFadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Pane Header */
+.obwk-pane-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.obwk-pane-title {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin: 0 0 4px 0 !important;
+}
+
+.obwk-pane-desc {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0;
+}
+
+.obwk-pane-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Action Buttons */
+.obwk-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    line-height: 1.4;
+    border: 1px solid transparent;
+}
+
+.obwk-btn-primary {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+}
+
+.obwk-btn-primary:hover {
+    background: #1d4ed8;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.obwk-btn-secondary {
+    background: #0f172a;
+    color: #ffffff;
+    border-color: #0f172a;
+}
+
+.obwk-btn-secondary:hover {
+    background: #1e293b;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+}
+
+.obwk-btn-outline {
+    background: #ffffff;
+    color: #334155;
+    border-color: #cbd5e1;
+}
+
+.obwk-btn-outline:hover {
+    background: #f8fafc;
+    color: #0f172a;
+    border-color: #94a3b8;
+}
+
+.obwk-btn-sm {
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 6px;
+}
+
+/* Fields Table */
+.obwk-table-wrap {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.obwk-fields-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    background: #ffffff;
+}
+
+.obwk-fields-table thead th {
+    background: #f8fafc;
+    padding: 12px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.obwk-fields-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.15s ease;
+}
+
+.obwk-fields-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.obwk-fields-table tbody tr.is-disabled-row {
+    background: #fafafa;
+    opacity: 0.65;
+}
+
+.obwk-fields-table tbody tr.ui-sortable-helper {
+    background: #ffffff;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    border: 1px solid #cbd5e1;
+}
+
+.obwk-fields-table tbody tr.ui-sortable-placeholder {
+    visibility: visible !important;
+    background: #eff6ff !important;
+    border: 2px dashed #93c5fd !important;
+    height: 52px;
+}
+
+.obwk-fields-table td {
+    padding: 12px 14px;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+/* Drag Handle */
+.obwk-drag-handle {
+    cursor: grab;
+    color: #94a3b8;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.obwk-drag-handle:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.obwk-drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Mini Switch Controls */
+.obwk-switch-sm {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+    margin: 0;
+}
+
+.obwk-switch-sm input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.obwk-switch-sm .obwk-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: .25s;
+    border-radius: 20px;
+}
+
+.obwk-switch-sm .obwk-slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .25s;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.obwk-switch-sm input:checked + .obwk-slider {
+    background-color: #10b981;
+}
+
+.obwk-switch-sm input:checked + .obwk-slider:before {
+    transform: translateX(16px);
+}
+
+/* Label & Key Column */
+.obwk-label-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.obwk-field-label-text {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.obwk-field-key-text code {
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: #475569;
+    font-family: monospace;
+}
+
+.obwk-badge-core {
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.obwk-badge-custom {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Type Badge */
+.obwk-type-badge {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+/* Width Select */
+.obwk-row-width-select {
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    font-size: 12px;
+    background: #ffffff;
+    color: #334155;
+    cursor: pointer;
+}
+
+/* Row Action Buttons */
+.obwk-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.obwk-action-btn {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.15s ease;
+}
+
+.obwk-action-btn:hover {
+    background: #eff6ff;
+    color: #2563eb;
+    border-color: #93c5fd;
+}
+
+.obwk-delete-field-btn:hover {
+    background: #fef2f2;
+    color: #dc2626;
+    border-color: #fca5a5;
+}
+
+/* Quick Presets Grid */
+.obwk-presets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.obwk-preset-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+    transition: all 0.2s ease;
+}
+
+.obwk-preset-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+    transform: translateY(-2px);
+}
+
+.obwk-preset-icon {
+    font-size: 28px;
+}
+
+.obwk-preset-title {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin: 0 0 6px 0 !important;
+}
+
+.obwk-preset-desc {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0 0 12px 0;
+    line-height: 1.5;
+}
+
+.obwk-preset-meta {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.obwk-tag {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* Modal Window */
+.obwk-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.obwk-modal-dialog {
+    background: #ffffff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 620px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    animation: obwkModalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes obwkModalPop {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.obwk-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.obwk-modal-title {
+    font-size: 17px !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+    color: #0f172a !important;
+}
+
+.obwk-modal-close {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.obwk-modal-close:hover {
+    color: #0f172a;
+}
+
+.obwk-modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.obwk-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+/* Form Controls in Modal */
+.obwk-form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.obwk-form-col {
+    flex: 1;
+}
+
+.obwk-form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 6px;
+}
+
+.obwk-form-label .req {
+    color: #ef4444;
+}
+
+.obwk-form-control {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #1e293b;
+    background: #ffffff;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.obwk-form-control:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    outline: none;
+}
+
+.obwk-field-hint {
+    display: block;
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 4px;
+}
+
+/* Options Repeater */
+.obwk-options-group {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 16px;
+}
+
+.obwk-option-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+    align-items: center;
+}
+
+.obwk-option-item input {
+    flex: 1;
+}
+
+.obwk-remove-option-btn {
+    background: #fee2e2;
+    color: #dc2626;
+    border: none;
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Checkbox Grid */
+.obwk-checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 8px;
+    background: #f8fafc;
+    padding: 14px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.obwk-checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #334155;
+    cursor: pointer;
+}
+
+.obwk-checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    accent-color: #2563eb;
+}
+
+/* Toast Notifications */
+.obwk-toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #0f172a;
+    color: #ffffff;
+    padding: 14px 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    z-index: 100001;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: obwkToastSlide 0.3s ease;
+}
+
+.obwk-toast.is-error {
+    background: #dc2626;
+}
+
+.obwk-toast.is-success {
+    background: #059669;
+}
+
+@keyframes obwkToastSlide {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 782px) {
+    .obwk-form-row {
+        flex-direction: column;
+        gap: 12px;
+    }
+    .obwk-checkbox-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -93,6 +93,9 @@ class Plugin {
         // Register Product Tabs Module (Elementor Tabbed Product Carousel)
         $this->register_module(new Modules\Product_Tabs\Product_Tabs_Module());
 
+        // Register Checkout Field Customizer & Manager Module
+        $this->register_module(new Modules\Checkout_Fields\Checkout_Fields_Module());
+
         /**
          * Action to register additional custom modules
          *
