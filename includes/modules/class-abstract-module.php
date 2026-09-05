@@ -120,10 +120,13 @@ abstract class Abstract_Module {
      * @return mixed
      */
     public function get_option($key, $default = '') {
-        $options  = get_option(OBWK_SETTINGS_OPTION, array());
+        $options = get_option(OBWK_SETTINGS_OPTION, array());
+        if (!is_array($options)) {
+            $options = array();
+        }
         $full_key = $this->id . '_' . $key;
 
-        return isset($options[$full_key]) ? $options[$full_key] : $default;
+        return (isset($options[$full_key]) && '' !== $options[$full_key] && null !== $options[$full_key]) ? $options[$full_key] : $default;
     }
 
     /**

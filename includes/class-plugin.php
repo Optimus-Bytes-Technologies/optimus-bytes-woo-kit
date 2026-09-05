@@ -96,6 +96,9 @@ class Plugin {
         // Register Sale Badge & Discount Percentage Module
         $this->register_module(new Modules\Sale_Badge\Sale_Badge_Module());
 
+        // Register Stock Scarcity & Urgency Bar Module
+        $this->register_module(new Modules\Stock_Scarcity\Stock_Scarcity_Module());
+
         /**
          * Action to register additional custom modules
          *
