@@ -93,6 +93,9 @@ class Plugin {
         // Register Product Tabs Module (Elementor Tabbed Product Carousel)
         $this->register_module(new Modules\Product_Tabs\Product_Tabs_Module());
 
+        // Register Sale Badge & Discount Percentage Module
+        $this->register_module(new Modules\Sale_Badge\Sale_Badge_Module());
+
         /**
          * Action to register additional custom modules
          *

@@ -1,0 +1,72 @@
+/**
+ * Optimus Bytes Woo Kit - Sale Badge & Discount Percentage Styles
+ * 
+ * @package OptimusBytes\WooKit
+ */
+
+.woocommerce span.onsale.obwk-sale-badge,
+.woocommerce ul.products li.product .onsale.obwk-sale-badge,
+.thunk-product-image .onsale.obwk-sale-badge,
+.single-product.woocommerce span.onsale.obwk-sale-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: unset !important;
+    min-height: unset !important;
+    padding: 4px 9px !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+    letter-spacing: 0.03em !important;
+    text-transform: uppercase !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+    z-index: 9 !important;
+    margin: 0 !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Shapes */
+.woocommerce span.onsale.obwk-sale-badge.obwk-shape-rounded,
+.woocommerce ul.products li.product .onsale.obwk-sale-badge.obwk-shape-rounded {
+    border-radius: 4px !important;
+}
+
+.woocommerce span.onsale.obwk-sale-badge.obwk-shape-pill,
+.woocommerce ul.products li.product .onsale.obwk-sale-badge.obwk-shape-pill {
+    border-radius: 999px !important;
+    padding: 4px 11px !important;
+}
+
+.woocommerce span.onsale.obwk-sale-badge.obwk-shape-square,
+.woocommerce ul.products li.product .onsale.obwk-sale-badge.obwk-shape-square {
+    border-radius: 0px !important;
+}
+
+/* Positions */
+.woocommerce span.onsale.obwk-sale-badge.obwk-pos-top-right,
+.woocommerce ul.products li.product .onsale.obwk-sale-badge.obwk-pos-top-right {
+    top: 9px !important;
+    right: 9px !important;
+    left: auto !important;
+}
+
+.woocommerce span.onsale.obwk-sale-badge.obwk-pos-top-left,
+.woocommerce ul.products li.product .onsale.obwk-sale-badge.obwk-pos-top-left {
+    top: 9px !important;
+    left: 9px !important;
+    right: auto !important;
+}
+
+/* Single Product Page adjustment */
+.single-product.woocommerce span.onsale.obwk-sale-badge {
+    top: 14px !important;
+    left: 14px !important;
+    right: auto !important;
+}
+
+.single-product.woocommerce span.onsale.obwk-sale-badge.obwk-pos-top-right {
+    right: 14px !important;
+    left: auto !important;
+}
