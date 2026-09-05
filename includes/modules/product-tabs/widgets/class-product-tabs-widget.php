@@ -69,6 +69,24 @@ class Product_Tabs_Widget extends Widget_Base {
     }
 
     /**
+     * Get style dependencies
+     *
+     * @return array
+     */
+    public function get_style_depends() {
+        return array('obwk-product-tabs-style', 'obwk-sale-badge');
+    }
+
+    /**
+     * Get script dependencies
+     *
+     * @return array
+     */
+    public function get_script_depends() {
+        return array('obwk-product-tabs-script');
+    }
+
+    /**
      * Get Product Categories for Select Controls
      *
      * @return array
@@ -327,12 +345,13 @@ class Product_Tabs_Widget extends Widget_Base {
         $this->add_control(
             'show_badge',
             array(
-                'label'        => __('Discount % Off Badge', 'optimus-bytes-woo-kit'),
+                'label'        => __('Sale / Discount Badge', 'optimus-bytes-woo-kit'),
                 'type'         => Controls_Manager::SWITCHER,
                 'label_on'     => __('Yes', 'optimus-bytes-woo-kit'),
                 'label_off'    => __('No', 'optimus-bytes-woo-kit'),
                 'return_value' => 'yes',
                 'default'      => 'yes',
+                'description'  => __('Displays the dynamic sale / discount percentage badge configured in Woo Kit & WooCommerce.', 'optimus-bytes-woo-kit'),
             )
         );
 
@@ -936,9 +955,11 @@ class Product_Tabs_Widget extends Widget_Base {
             return '';
         }
 
-        global $product;
+        global $post, $product;
+        $prev_post    = $post;
         $prev_product = $product;
         $product      = $current_product;
+        $post         = get_post($current_product->get_id());
 
         $product_id         = $current_product->get_id();
         $title              = $current_product->get_name();
@@ -948,19 +969,52 @@ class Product_Tabs_Widget extends Widget_Base {
         $secondary_image_id = (!empty($gallery_image_ids)) ? $gallery_image_ids[0] : null;
 
         $show_secondary     = (!empty($settings['show_secondary_image']) && 'yes' === $settings['show_secondary_image']);
-        $show_badge         = (!empty($settings['show_badge']) && 'yes' === $settings['show_badge']);
+        $show_badge         = (!isset($settings['show_badge']) || 'yes' === $settings['show_badge']);
         $show_rating        = (!empty($settings['show_rating']) && 'yes' === $settings['show_rating']);
         $show_swatches      = (!empty($settings['show_swatches']) && 'yes' === $settings['show_swatches']);
         $show_add_to_cart   = (!empty($settings['show_add_to_cart']) && 'yes' === $settings['show_add_to_cart']);
         $show_whatsapp      = (!empty($settings['show_whatsapp_btn']) && 'yes' === $settings['show_whatsapp_btn']);
 
-        // Calculate discount percentage if on sale
-        $discount_pct = 0;
-        if ($current_product->is_on_sale()) {
-            $regular_price = (float) $current_product->get_regular_price();
-            $sale_price    = (float) $current_product->get_sale_price();
-            if ($regular_price > 0 && $sale_price > 0 && $regular_price > $sale_price) {
-                $discount_pct = round((($regular_price - $sale_price) / $regular_price) * 100);
+        // Calculate discount percentage & sale badge (fully integrated with Woo Kit Sale Badge module & WooCommerce loop sale flash)
+        $sale_badge_html = '';
+        if ($show_badge && $current_product->is_on_sale()) {
+            // Apply standard WooCommerce sale flash filter (Sale_Badge_Module hooks here at priority 25)
+            $sale_badge_html = apply_filters(
+                'woocommerce_sale_flash',
+                '<span class="onsale">' . esc_html__('Sale!', 'woocommerce') . '</span>',
+                $post,
+                $current_product
+            );
+
+            // Fallback: If filter returns default text without percentage and Sale_Badge_Module is not loaded
+            if (empty($sale_badge_html) || strip_tags($sale_badge_html) === 'Sale!') {
+                $discount_pct = 0;
+                if ($current_product->is_type('variable')) {
+                    $prices = $current_product->get_variation_prices();
+                    if (!empty($prices['regular_price']) && !empty($prices['sale_price'])) {
+                        $percentages = array();
+                        foreach ($prices['regular_price'] as $var_id => $reg_price) {
+                            $reg_val  = (float) $reg_price;
+                            $sale_val = isset($prices['sale_price'][$var_id]) ? (float) $prices['sale_price'][$var_id] : 0;
+                            if ($reg_val > 0 && $sale_val > 0 && $reg_val > $sale_val) {
+                                $percentages[] = round((($reg_val - $sale_val) / $reg_val) * 100);
+                            }
+                        }
+                        if (!empty($percentages)) {
+                            $discount_pct = max($percentages);
+                        }
+                    }
+                } else {
+                    $regular_price = (float) $current_product->get_regular_price();
+                    $sale_price    = (float) $current_product->get_sale_price();
+                    if ($regular_price > 0 && $sale_price > 0 && $regular_price > $sale_price) {
+                        $discount_pct = round((($regular_price - $sale_price) / $regular_price) * 100);
+                    }
+                }
+
+                if ($discount_pct > 0) {
+                    $sale_badge_html = '<span class="onsale obwk-sale-badge obwk-shape-rounded obwk-pos-top_right">' . esc_html($discount_pct) . '% ' . esc_html__('OFF', 'optimus-bytes-woo-kit') . '</span>';
+                }
             }
         }
 
@@ -980,8 +1034,8 @@ class Product_Tabs_Widget extends Widget_Base {
                     <?php endif; ?>
                 </a>
 
-                <?php if ($show_badge && $discount_pct > 0) : ?>
-                    <span class="obwk-discount-badge"><?php echo esc_html($discount_pct); ?>% <?php esc_html_e('OFF', 'optimus-bytes-woo-kit'); ?></span>
+                <?php if (!empty($sale_badge_html)) : ?>
+                    <?php echo $sale_badge_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                 <?php endif; ?>
 
                 <?php if ($show_whatsapp && class_exists('OptimusBytes\WooKit\Modules\Product_WhatsApp\Product_WhatsApp_Module')) : 
@@ -1040,6 +1094,7 @@ class Product_Tabs_Widget extends Widget_Base {
             </div>
         </div>
         <?php
+        $post    = $prev_post;
         $product = $prev_product;
         return ob_get_clean();
     }
@@ -1125,6 +1180,7 @@ class Product_Tabs_Widget extends Widget_Base {
 
         $container_classes = array(
             'obwk-product-tabs-wrapper',
+            'woocommerce',
             'obwk-tabs-style-' . sanitize_html_class($tab_style),
             'obwk-aspect-' . sanitize_html_class($aspect_ratio),
             'obwk-layout-' . sanitize_html_class($layout),
@@ -1185,7 +1241,20 @@ class Product_Tabs_Widget extends Widget_Base {
                                 <div class="obwk-product-grid obwk-cols-<?php echo esc_attr($columns_desktop); ?> obwk-cols-tab-<?php echo esc_attr($columns_tablet); ?> obwk-cols-mob-<?php echo esc_attr($columns_mobile); ?>">
                             <?php endif; ?>
 
-                                <?php foreach ($posts as $post) : 
+                                <?php 
+                                global $post, $product;
+                                $orig_post    = $post;
+                                $orig_product = $product;
+
+                                if (function_exists('wc_setup_loop')) {
+                                    wc_setup_loop(array(
+                                        'name'         => 'obwk_product_tabs',
+                                        'is_shortcode' => true,
+                                    ));
+                                }
+
+                                foreach ($posts as $post) : 
+                                    setup_postdata($post);
                                     $product = wc_get_product($post->ID);
                                     if (!$product) continue;
                                 ?>
@@ -1198,7 +1267,16 @@ class Product_Tabs_Widget extends Widget_Base {
                                     <?php if ('slider' === $layout) : ?>
                                         </div>
                                     <?php endif; ?>
-                                <?php endforeach; ?>
+                                <?php 
+                                endforeach; 
+
+                                wp_reset_postdata();
+                                if (function_exists('wc_reset_loop')) {
+                                    wc_reset_loop();
+                                }
+                                $post    = $orig_post;
+                                $product = $orig_product;
+                                ?>
 
                             <?php if ('slider' === $layout) : ?>
                                     </div>

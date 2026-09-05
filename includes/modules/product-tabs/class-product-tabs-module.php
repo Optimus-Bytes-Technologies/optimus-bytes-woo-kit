@@ -114,9 +114,24 @@ class Product_Tabs_Module extends Abstract_Module {
             )
         );
 
+        if (!wp_style_is('obwk-sale-badge', 'registered')) {
+            wp_register_style(
+                'obwk-sale-badge',
+                OBWK_PLUGIN_URL . 'assets/css/sale-badge.css',
+                array(),
+                OBWK_VERSION
+            );
+        }
+
         if ($this->is_enabled()) {
             wp_enqueue_style('obwk-product-tabs-style');
             wp_enqueue_script('obwk-product-tabs-script');
+
+            // Enqueue sale badge styles if sale badge module is active
+            $settings = get_option(OBWK_SETTINGS_OPTION, array());
+            if (!empty($settings['sale_badge_enable'])) {
+                wp_enqueue_style('obwk-sale-badge');
+            }
         }
     }
 

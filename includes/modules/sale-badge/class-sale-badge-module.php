@@ -60,10 +60,10 @@ class Sale_Badge_Module extends Abstract_Module {
 
         $custom_css = '';
         if (!empty($bg_color)) {
-            $custom_css .= ".woocommerce span.onsale.obwk-sale-badge, .woocommerce ul.products li.product .onsale.obwk-sale-badge { background-color: " . esc_attr($bg_color) . " !important; border-color: " . esc_attr($bg_color) . " !important; } ";
+            $custom_css .= ".woocommerce span.onsale.obwk-sale-badge, .woocommerce ul.products li.product .onsale.obwk-sale-badge, .obwk-product-card .onsale.obwk-sale-badge, .obwk-product-img-box .onsale.obwk-sale-badge { background-color: " . esc_attr($bg_color) . " !important; border-color: " . esc_attr($bg_color) . " !important; } ";
         }
         if (!empty($text_color)) {
-            $custom_css .= ".woocommerce span.onsale.obwk-sale-badge, .woocommerce ul.products li.product .onsale.obwk-sale-badge { color: " . esc_attr($text_color) . " !important; } ";
+            $custom_css .= ".woocommerce span.onsale.obwk-sale-badge, .woocommerce ul.products li.product .onsale.obwk-sale-badge, .obwk-product-card .onsale.obwk-sale-badge, .obwk-product-img-box .onsale.obwk-sale-badge { color: " . esc_attr($text_color) . " !important; } ";
         }
 
         if (!empty($custom_css)) {
